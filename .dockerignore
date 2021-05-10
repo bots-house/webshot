@@ -1,0 +1,6 @@
+## ignore everything 
+** 
+
+!/main.go
+!/go.*
+!/internal/*

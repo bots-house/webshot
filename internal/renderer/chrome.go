@@ -26,14 +26,14 @@ func (chrome *Chrome) buildContextOptions() []chromedp.ContextOption {
 	return opts
 }
 
-func (chrome *Chrome) buildAllocator(ctx context.Context) (context.Context, context.CancelFunc) {
-	return chromedp.NewExecAllocator(ctx,
-		append(
-			chromedp.DefaultExecAllocatorOptions[:],
-			chromedp.Flag("headless", false),
-		)...,
-	)
-}
+// func (chrome *Chrome) buildAllocator(ctx context.Context) (context.Context, context.CancelFunc) {
+// 	return chromedp.NewExecAllocator(ctx,
+// 		append(
+// 			chromedp.DefaultExecAllocatorOptions[:],
+// 			chromedp.Flag("headless", false),
+// 		)...,
+// 	)
+// }
 
 func (chrome *Chrome) Render(
 	ctx context.Context,

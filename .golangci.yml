@@ -1,0 +1,44 @@
+linters-settings:
+  goimports:
+    local-prefixies: github.com/bots-house/crosser-similar
+
+output:
+  format: tab
+
+run:
+  tests: false
+
+linters:
+  enable:
+    - misspell
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - unconvert
+    - megacheck
+    - gas
+    - gocyclo
+    - dupl
+    - unparam
+    - bodyclose
+    - gosec
+    - gofmt
+    - goimports
+    - prealloc
+    - gocritic
+    - goprintffuncname
+    - nestif
+    - rowserrcheck
+    - stylecheck
+    - goconst
+    # - wsl
+    # - interfacer
+    # - gomnd
+    # - goerr113
