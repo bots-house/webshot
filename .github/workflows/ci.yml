@@ -69,7 +69,7 @@ jobs:
 
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/crosser-similar:latest
+            ghcr.io/${{ github.repository_owner }}/webshot:latest
 
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -93,7 +93,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: Deploy Stack
         uses: bots-house/portainer-deploy-stack-action@main
         with:
