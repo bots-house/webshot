@@ -91,6 +91,9 @@ jobs:
     needs: [build-image]
     if: github.ref == 'refs/heads/main'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
       - name: Deploy Stack
         uses: bots-house/portainer-deploy-stack-action@main
         with:
