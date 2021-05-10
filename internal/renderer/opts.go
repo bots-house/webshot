@@ -3,6 +3,8 @@ package renderer
 import (
 	"fmt"
 	"strings"
+
+	"golang.org/x/xerrors"
 )
 
 type ImageFormat int8
@@ -52,11 +54,29 @@ type Opts struct {
 	// Viewport height in pixels of the browser render. Default is 867
 	Height int
 
-	// Scale
+	// Scale from 0
 	Scale float64
 
 	// Format of image
 	Format ImageFormat
+
+	// Quality of image
+	Quality int
+
+	Clip OptsClip
+}
+
+func (opts *Opts) Validate() error {
+	if err := opts.OptsClip.Validate(); err != nil {
+		return xerrors.Errorf("validate clip: %w", err)
+	}
+
+	return nil
+}
+
+type OptsClip struct {
+	X, Y          float64
+	Width, Height float64
 }
 
 const (

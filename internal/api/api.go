@@ -70,6 +70,15 @@ func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 			}
 		}
 
+		if v := r.Form.Get("quality"); v != "" {
+			var err error
+			opts.Quality, err = strconv.Atoi(v)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("parameter `quality` is not int: %v", err), http.StatusUnprocessableEntity)
+				return
+			}
+		}
+
 		log.Info().
 			Str("url", url).
 			Int("width", opts.Width).

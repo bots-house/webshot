@@ -5,7 +5,6 @@ import (
 	"context"
 	"io"
 	"log"
-	"time"
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
@@ -62,20 +61,20 @@ func (chrome *Chrome) Render(
 		chromedp.EmulateScale(opts.getScale()),
 	))
 
-	actions = append(actions, chromedp.Sleep(time.Second*5))
+	// actions = append(actions, chromedp.Sleep(time.Second*5))
 
 	res := []byte{}
 
-	actions = append(actions, captureScreenshot(&res, opts.Format))
+	actions = append(actions, captureScreenshot(&res, opts))
 
 	if err := chromedp.Run(ctx, actions...); err != nil {
-		return nil, xerrors.Errorf("make screen shot")
+		return nil, xerrors.Errorf("make screen shot: %w", err)
 	}
 
 	return bytes.NewReader(res), nil
 }
 
-func captureScreenshot(res *[]byte, format ImageFormat) chromedp.Action {
+func captureScreenshot(res *[]byte, opts *Opts) chromedp.Action {
 	if res == nil {
 		panic("res cannot be nil")
 	}
@@ -85,12 +84,21 @@ func captureScreenshot(res *[]byte, format ImageFormat) chromedp.Action {
 
 		call := page.CaptureScreenshot()
 
-		switch format {
+		switch opts.Format {
 		case ImageTypeJPEG:
 			call = call.WithFormat(page.CaptureScreenshotFormatJpeg)
 		case ImageTypePNG:
 			call = call.WithFormat(page.CaptureScreenshotFormatPng)
 		}
+
+		call = call.WithQuality(int64(opts.Quality))
+
+		// call = call.WithClip(&page.Viewport{
+		// 	X:      opts.Clip.X,
+		// 	Y:      opts.Clip.Y,
+		// 	Width:  opts.Clip.Width,
+		// 	Height: opts.Clip.Height,
+		// })
 
 		*res, err = call.Do(ctx)
 		return err
