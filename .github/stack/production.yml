@@ -1,0 +1,43 @@
+version: "3"
+
+networks:
+  traefik_default:
+    external: true
+
+services:
+  server:
+    image: ghcr.io/bots-house/webshot:latest
+
+    networks: [traefik_default, default]
+
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+    
+    deploy:
+      replicas: 1
+    
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+      restart_policy:
+        condition: on-failure
+
+      placement:
+        constraints:
+          - node.role == worker
+          - node.labels.env == production-mix
+
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik_default
+        - traefik.http.routers.webshot-http.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.webshot-http.entrypoints=http
+        - traefik.http.routers.webshot-http.middlewares=https-redirect
+        - traefik.http.routers.webshot-https.rule=Host(`${DOMAIN?Variable not set}`)
+        - traefik.http.routers.webshot-https.entrypoints=https
+        - traefik.http.routers.webshot-https.tls=true
+        - traefik.http.routers.webshot-https.tls.certresolver=le
+        - traefik.http.services.webshot.loadbalancer.server.port=8000

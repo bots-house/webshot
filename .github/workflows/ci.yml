@@ -62,7 +62,7 @@ jobs:
         id: build_and_push
         uses: docker/build-push-action@v2
         with:
-          build-args: | 
+          build-args: |
             BUILD_VERSION=${{ steps.build_info.outputs.version }}
             BUILD_REF=${{ steps.build_info.outputs.ref }}
             BUILD_TIME=${{ steps.build_info.outputs.time }}
@@ -73,7 +73,7 @@ jobs:
 
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-        
+
       # Temp fix
       # https://github.com/docker/build-push-action/issues/252
       # https://github.com/moby/buildkit/issues/1896
@@ -84,3 +84,28 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.build_and_push.outputs.digest }}
+
+  deploy-prod:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: [build-image]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy Stack
+        uses: bots-house/portainer-deploy-stack-action@main
+        with:
+          portainer-url: ${{ secrets.CLUSTER_PORTAINER_URL }}
+
+          portainer-username: ${{ secrets.CLUSTER_PORTAINER_USERNAME }}
+          portainer-password: ${{ secrets.CLUSTER_PORTAINER_PASSWORD }}
+
+          portainer-endpoint: 1
+
+          stack-name: webshot
+
+          stack-file: .github/stack/production.yml
+
+          stack-vars: |
+            DOMAIN: webshot.${{ secrets.CLUSTER_PORTAINER_DOMAIN }}
+
+          teams: Microservices
