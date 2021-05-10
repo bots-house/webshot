@@ -17,6 +17,8 @@ func main() {
 
 	rndr := &renderer.Chrome{Debug: false}
 
+	api := api.New(api.Deps{Renderer: rndr})
+
 	log.Info().Str("addr", "http://"+addr).Msg("listen http")
-	http.ListenAndServe("0.0.0.0:8000", api.ScreenshotHandler(rndr))
+	http.ListenAndServe("0.0.0.0:8000", api)
 }
