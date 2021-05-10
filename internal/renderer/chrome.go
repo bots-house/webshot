@@ -8,6 +8,7 @@ import (
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+
 	"golang.org/x/xerrors"
 )
 
@@ -61,8 +62,6 @@ func (chrome *Chrome) Render(
 		chromedp.EmulateScale(opts.getScale()),
 	))
 
-	// actions = append(actions, chromedp.Sleep(time.Second*5))
-
 	res := []byte{}
 
 	actions = append(actions, captureScreenshot(&res, opts))
@@ -93,12 +92,15 @@ func captureScreenshot(res *[]byte, opts *Opts) chromedp.Action {
 
 		call = call.WithQuality(int64(opts.Quality))
 
-		// call = call.WithClip(&page.Viewport{
-		// 	X:      opts.Clip.X,
-		// 	Y:      opts.Clip.Y,
-		// 	Width:  opts.Clip.Width,
-		// 	Height: opts.Clip.Height,
-		// })
+		if opts.Clip.IsSet() {
+			call = call.WithClip(&page.Viewport{
+				X:      *opts.Clip.X,
+				Y:      *opts.Clip.Y,
+				Width:  *opts.Clip.Width,
+				Height: *opts.Clip.Height,
+				Scale:  1.0,
+			})
+		}
 
 		*res, err = call.Do(ctx)
 		return err

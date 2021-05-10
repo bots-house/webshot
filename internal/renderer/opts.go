@@ -63,11 +63,13 @@ type Opts struct {
 	// Quality of image
 	Quality int
 
+	// Clip of viewport.
+	// All fields is required.
 	Clip OptsClip
 }
 
 func (opts *Opts) Validate() error {
-	if err := opts.OptsClip.Validate(); err != nil {
+	if err := opts.Clip.Validate(); err != nil {
 		return xerrors.Errorf("validate clip: %w", err)
 	}
 
@@ -75,8 +77,51 @@ func (opts *Opts) Validate() error {
 }
 
 type OptsClip struct {
-	X, Y          float64
-	Width, Height float64
+	X, Y          *float64
+	Width, Height *float64
+}
+
+func (optsClip *OptsClip) IsSet() bool {
+	return optsClip.X != nil && optsClip.Y != nil && optsClip.Width != nil && optsClip.Height != nil
+}
+
+func (optsClip *OptsClip) SetX(v float64) {
+	optsClip.X = &v
+}
+
+func (optsClip *OptsClip) SetY(v float64) {
+	optsClip.Y = &v
+}
+
+func (optsClip *OptsClip) SetWidth(v float64) {
+	optsClip.Width = &v
+}
+
+func (optsClip *OptsClip) SetHeight(v float64) {
+	optsClip.Height = &v
+}
+
+func (optsClip OptsClip) Validate() error {
+	if optsClip.X == nil && optsClip.Y == nil && optsClip.Width == nil && optsClip.Height == nil {
+		return nil
+	}
+	if optsClip.X == nil {
+		return xerrors.Errorf("missing field `x`")
+	}
+
+	if optsClip.Y == nil {
+		return xerrors.Errorf("missing field `y`")
+	}
+
+	if optsClip.Width == nil {
+		return xerrors.Errorf("missing field `width`")
+	}
+
+	if optsClip.Height == nil {
+		return xerrors.Errorf("missing field `height`")
+	}
+
+	return nil
 }
 
 const (

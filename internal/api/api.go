@@ -79,12 +79,66 @@ func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 			}
 		}
 
+		if v := r.Form.Get("clip_x"); v != "" {
+			var err error
+
+			x, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("parameter `clip_x` is not float64: %v", err), http.StatusUnprocessableEntity)
+				return
+			}
+
+			opts.Clip.SetX(x)
+		}
+
+		if v := r.Form.Get("clip_y"); v != "" {
+			var err error
+
+			y, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("parameter `clip_y` is not float64: %v", err), http.StatusUnprocessableEntity)
+				return
+			}
+
+			opts.Clip.SetY(y)
+		}
+
+		if v := r.Form.Get("clip_width"); v != "" {
+			var err error
+
+			y, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("parameter `clip_width` is not float64: %v", err), http.StatusUnprocessableEntity)
+				return
+			}
+
+			opts.Clip.SetWidth(y)
+		}
+
+		if v := r.Form.Get("clip_height"); v != "" {
+			var err error
+
+			y, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("parameter `clip_height` is not float64: %v", err), http.StatusUnprocessableEntity)
+				return
+			}
+
+			opts.Clip.SetHeight(y)
+		}
+
+		if err := opts.Validate(); err != nil {
+			http.Error(w, fmt.Sprintf("validate clip opts: %v", err), http.StatusUnprocessableEntity)
+			return
+		}
+
 		log.Info().
 			Str("url", url).
 			Int("width", opts.Width).
 			Int("height", opts.Height).
 			Float64("scale", opts.Scale).
 			Str("format", opts.Format.String()).
+			Bool("clip", opts.Clip.IsSet()).
 			Str("ip", realip.FromRequest(r)).
 			Msg("screenshot call")
 
