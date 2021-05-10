@@ -85,8 +85,8 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.build_and_push.outputs.digest }}
 
-  deploy-prod:
-    name: Deploy Production
+  deploy-stage:
+    name: Deploy Staging
     runs-on: ubuntu-latest
     needs: [build-image]
     if: github.ref == 'refs/heads/main'
@@ -101,9 +101,9 @@ jobs:
 
           portainer-endpoint: 1
 
-          stack-name: webshot
+          stack-name: webshot-stage
 
-          stack-file: .github/stack/production.yml
+          stack-file: .github/stack/stage.yml
 
           stack-vars: |
             DOMAIN: webshot.${{ secrets.CLUSTER_PORTAINER_DOMAIN }}

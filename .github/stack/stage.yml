@@ -29,6 +29,10 @@ services:
         constraints:
           - node.role == worker
           - node.labels.env == production-mix
+      
+      resources:
+        limits:
+          memory: 200M
 
       labels:
         - traefik.enable=true
