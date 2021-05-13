@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bots-house/webshot/internal/api"
+	"github.com/bots-house/webshot/internal/api2"
 	"github.com/bots-house/webshot/internal/renderer"
 	"github.com/jessevdk/go-flags"
 	"github.com/rs/zerolog"
@@ -80,7 +80,9 @@ func run(ctx context.Context, config Config) error {
 
 	rndr := &renderer.Chrome{Debug: false}
 
-	api := api.New(api.Deps{Renderer: rndr})
+	api := api2.Handler{
+		Renderer: rndr,
+	}.Make()
 
 	server := newServer(
 		config.HTTP.Addr,

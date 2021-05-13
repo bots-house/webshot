@@ -1,0 +1,65 @@
+swagger: "2.0"
+
+info:
+  description: Make a screenshot of anything in Web.
+  title: WebShot
+  version: 0.1.0
+  contact:
+    email: "webshot-team@bots.house"
+
+basePath: /v1
+
+produces:
+  - application/json
+
+consumes:
+  - application/json
+
+schemes:
+  - https
+  - http
+
+tags:
+  - name: utils
+    description: Contains services methods for service operation.
+  - name: screenshot
+    description: Contains method to get different screenshots.
+
+paths:
+  /image:
+    get:
+      summary: Get Image
+      operationId: getImage
+      parameters:
+        - $ref: '#/parameters/ScreenshotURL'
+      responses:
+        200:
+          description: OK
+
+  /ping:
+    get: 
+      summary: Liveness Probe
+      operationId: getPing
+      tags: [utils]
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties: 
+              status: 
+                type: string
+                example: 💚
+
+parameters:
+  ScreenshotURL:
+    name: url 
+    in: query 
+    description: Target website URL
+    required: true
+    type: string 
+    format: url
+
+
+
+
