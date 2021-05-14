@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"golang.org/x/xerrors"
 )
 
@@ -81,8 +80,6 @@ func (r *ChromeResolverAPI) BrowserWebSocketURL(ctx context.Context) (string, er
 	if err := json.NewDecoder(res.Body).Decode(&chromeInfo); err != nil {
 		return "", fmt.Errorf("decode devtools url lookup response: %w", err)
 	}
-
-	log.Info().Str("url", chromeInfo.WebSocketDebuggerURL).Msg("get browser")
 
 	return chromeInfo.WebSocketDebuggerURL, nil
 }

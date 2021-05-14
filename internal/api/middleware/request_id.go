@@ -19,11 +19,12 @@ func RequestID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		// find first matched header
 		var id string
+
 		for _, headerName := range inputHeaders {
 			v := r.Header.Get(headerName)
 			if v != "" {
 				id = v
-				return
+				break
 			}
 		}
 

@@ -78,9 +78,14 @@ func (chrome *Chrome) Render(
 		if err != nil {
 			return nil, xerrors.Errorf("resolve remote browser: %w", err)
 		}
+
+		log.Ctx(ctx).Debug().Str("url", wsurl).Msg("use remote browser")
+
 		var cancel context.CancelFunc
 		ctx, cancel = chromedp.NewRemoteAllocator(ctx, wsurl)
 		defer cancel()
+	} else {
+		log.Ctx(ctx).Debug().Msg("use embedded browser")
 	}
 
 	// create context
