@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/tomasen/realip"
@@ -14,6 +15,8 @@ import (
 
 func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		started := time.Now()
+
 		if err := r.ParseForm(); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -155,7 +158,7 @@ func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 
 		output, err := rndr.Render(ctx, url, &opts)
 		if err != nil {
-			log.Error().Err(err).Msg("render error")
+			log.Ctx(ctx).Error().Err(err).Msg("render error")
 			http.Error(w, fmt.Sprintf("render error: %v", err), http.StatusInternalServerError)
 			return
 		}
@@ -164,10 +167,10 @@ func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 
 		n, err := io.Copy(w, output)
 		if err != nil {
-			log.Error().Err(err).Msg("copy output")
+			log.Ctx(ctx).Error().Err(err).Msg("copy output")
 			return
 		}
 
-		log.Debug().Int64("size", n).Msg("image generated")
+		log.Ctx(ctx).Debug().Int64("size", n).Dur("took", time.Since(started)).Msg("image generated")
 	})
 }

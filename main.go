@@ -15,12 +15,22 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/xerrors"
 )
 
 type Config struct {
 	HTTP struct {
 		Addr string `long:"addr" description:"http addr to listen" env:"ADDR" default:":8000"`
 	} `group:"HTTP" namespace:"http" env-namespace:"HTTP"`
+
+	Browser struct {
+		Addr string `long:"addr" description:"remote browser connection string. Allowed is ws://... or http://" env:"ADDR"`
+	} `group:"Browser" namespace:"browser" env-namespace:"BROWSER"`
+
+	Log struct {
+		Pretty bool `long:"pretty" description:"enable pretty logging" env:"PRETTY"`
+		Debug  bool `long:"debug" description:"enable debug level" env:"DEBUG"`
+	} `group:"Logging" namespace:"log" env-namespace:"LOG"`
 }
 
 func loadConfig() Config {
@@ -51,12 +61,12 @@ var (
 )
 
 func main() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
 	config := loadConfig()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	ctx = withLogger(ctx, config)
 
 	ctx, cancel = signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -76,21 +86,38 @@ func main() {
 }
 
 func run(ctx context.Context, config Config) error {
-	log.Info().Str("addr", config.HTTP.Addr).Msg("listen http...")
 
-	rndr := &renderer.Chrome{Debug: false}
+	var resolver renderer.ChromeResolver
+	if config.Browser.Addr != "" {
+		log.Ctx(ctx).Info().Str("addr", config.Browser.Addr).Msg("use chrome remote resolver")
+
+		var err error
+		resolver, err = renderer.NewChromeResolver(config.Browser.Addr)
+		if err != nil {
+			return xerrors.Errorf("new chrome resolver '%s': %w", config.Browser.Addr, err)
+		}
+	}
+
+	rndr := &renderer.Chrome{Debug: false, Resolver: resolver}
 
 	api := api.New(api.Deps{Renderer: rndr})
 
-	server := newServer(
-		config.HTTP.Addr,
-		api,
-	)
+	return listenAndServe(ctx, config.HTTP.Addr, api)
+}
+
+func listenAndServe(ctx context.Context, addr string, handler http.Handler) error {
+	server := &http.Server{
+		Addr:    addr,
+		Handler: handler,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
+	}
 
 	go func() {
 		<-ctx.Done()
 
-		log.Warn().Msg("shutdown signal received")
+		log.Ctx(ctx).Warn().Msg("shutdown signal received")
 
 		shutdownCtx, cancel := context.WithTimeout(
 			context.Background(),
@@ -100,10 +127,11 @@ func run(ctx context.Context, config Config) error {
 		defer cancel()
 
 		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Warn().Err(err).Msg("shutdown error")
+			log.Ctx(ctx).Warn().Err(err).Msg("shutdown error")
 		}
 	}()
 
+	log.Ctx(ctx).Info().Str("addr", addr).Msg("listen http...")
 	if err := server.ListenAndServe(); err == http.ErrServerClosed {
 		return nil
 	} else {
@@ -111,15 +139,16 @@ func run(ctx context.Context, config Config) error {
 	}
 }
 
-func newServer(addr string, handler http.Handler) *http.Server {
-	baseCtx := context.Background()
-	baseCtx = log.Logger.WithContext(baseCtx)
-
-	return &http.Server{
-		Addr:    addr,
-		Handler: handler,
-		BaseContext: func(_ net.Listener) context.Context {
-			return baseCtx
-		},
+func withLogger(ctx context.Context, config Config) context.Context {
+	if config.Log.Pretty {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
+
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
+	if config.Log.Debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	return log.Logger.WithContext(ctx)
 }

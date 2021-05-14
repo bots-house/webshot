@@ -14,6 +14,8 @@ import (
 
 type Chrome struct {
 	Debug bool
+
+	Resolver ChromeResolver
 }
 
 func (chrome *Chrome) buildContextOptions() []chromedp.ContextOption {
@@ -40,8 +42,15 @@ func (chrome *Chrome) Render(
 	url string,
 	opts *Opts,
 ) (io.Reader, error) {
-	// ctx, cancel := chrome.buildAllocator(ctx)
-	// defer cancel()
+	if chrome.Resolver != nil {
+		wsurl, err := chrome.Resolver.BrowserWebSocketURL(ctx)
+		if err != nil {
+			return nil, xerrors.Errorf("resolve remote browser: %w", err)
+		}
+		var cancel context.CancelFunc
+		ctx, cancel = chromedp.NewRemoteAllocator(ctx, wsurl)
+		defer cancel()
+	}
 
 	// create context
 	ctx, cancel := chromedp.NewContext(
