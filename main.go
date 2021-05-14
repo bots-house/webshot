@@ -27,6 +27,16 @@ type Config struct {
 		Addr string `long:"addr" description:"remote browser connection string. Allowed is ws://... or http://" env:"ADDR"`
 	} `group:"Browser" namespace:"browser" env-namespace:"BROWSER"`
 
+	Storage struct {
+		S3 struct {
+			Key      string `long:"key" description:"s3 key" env:"KEY"`
+			Secret   string `long:"secret" description:"s3 secret" env:"SECRET"`
+			Region   string `long:"region" description:"s3 region" env:"REGION"`
+			Bucket   string `long:"bucket" description:"s3 bucket" env:"BUCKET"`
+			Endpoint string `long:"endpoint" description:"s3 endpoint" env:"ENDPOINT"`
+		} `group:"S3" namespace:"s3" env-namespace:"S3"`
+	} `group:"Storage" namespace:"storage" env-namespace:"STORAGE"`
+
 	Log struct {
 		Pretty bool `long:"pretty" description:"enable pretty logging" env:"PRETTY"`
 		Debug  bool `long:"debug" description:"enable debug level" env:"DEBUG"`
