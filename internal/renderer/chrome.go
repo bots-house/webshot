@@ -3,11 +3,14 @@ package renderer
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
-	"log"
+	"time"
 
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"golang.org/x/xerrors"
 )
@@ -41,7 +44,35 @@ func (chrome *Chrome) Render(
 	ctx context.Context,
 	url string,
 	opts *Opts,
-) (io.Reader, error) {
+) (r io.Reader, err error) {
+	defer func(started time.Time) {
+		var ev *zerolog.Event
+
+		if err != nil {
+			ev = log.Ctx(ctx).Error().Err(err)
+		} else {
+			ev = log.Ctx(ctx).Info()
+		}
+
+		ev = ev.Str("url", url).
+			Int("width", opts.getWidth()).
+			Int("height", opts.getHeight()).
+			Float64("scale", opts.getScale()).
+			Str("format", opts.Format.String()).
+			Dur("took", time.Since(started))
+
+		if opts.Clip.IsSet() {
+			ev = ev.
+				Float64("clip_x", *opts.Clip.X).
+				Float64("clip_y", *opts.Clip.Y).
+				Float64("clip_width", *opts.Clip.Width).
+				Float64("clip_height", *opts.Clip.Height)
+		}
+
+		ev.Msg("screenshot")
+
+	}(time.Now())
+
 	if chrome.Resolver != nil {
 		wsurl, err := chrome.Resolver.BrowserWebSocketURL(ctx)
 		if err != nil {
@@ -62,24 +93,61 @@ func (chrome *Chrome) Render(
 	var actions []chromedp.Action
 
 	// go to url
-	actions = append(actions, chromedp.Navigate(url))
+	actions = append(actions, logAction(ctx,
+		"navigate", logFields{
+			"url": url,
+		},
+		chromedp.Navigate(url),
+	))
 
 	// set size and scale
-	actions = append(actions, chromedp.EmulateViewport(
-		int64(opts.getWidth()),
-		int64(opts.getHeight()),
-		chromedp.EmulateScale(opts.getScale()),
+	actions = append(actions, logAction(ctx,
+		"emulate viewport", logFields{
+			"width":  opts.getWidth(),
+			"height": opts.getHeight(),
+			"scale":  opts.getScale(),
+		},
+
+		chromedp.EmulateViewport(
+			int64(opts.getWidth()),
+			int64(opts.getHeight()),
+			chromedp.EmulateScale(opts.getScale()),
+		),
 	))
 
 	res := []byte{}
 
-	actions = append(actions, captureScreenshot(&res, opts))
+	actions = append(actions, logAction(ctx,
+		"screenshot",
+		nil,
+		captureScreenshot(&res, opts),
+	))
 
 	if err := chromedp.Run(ctx, actions...); err != nil {
 		return nil, xerrors.Errorf("make screen shot: %w", err)
 	}
 
 	return bytes.NewReader(res), nil
+}
+
+type logFields map[string]interface{}
+
+func logAction(ctx context.Context, name string, fields logFields, action chromedp.Action) chromedp.Action {
+	return chromedp.ActionFunc(func(c context.Context) (err error) {
+		defer func(started time.Time) {
+			var ev *zerolog.Event
+
+			if err != nil {
+				ev = log.Ctx(ctx).Error().Err(err)
+			} else {
+				ev = log.Ctx(ctx).Debug().Fields(fields)
+			}
+
+			ev.Dur("took", time.Since(started)).Msg(fmt.Sprintf("do %s", name))
+		}(time.Now())
+
+		return action.Do(c)
+	})
 }
 
 func captureScreenshot(res *[]byte, opts *Opts) chromedp.Action {

@@ -1,176 +1,79 @@
 package api
 
 import (
-	"fmt"
 	"io"
 	"net/http"
-	"strconv"
-	"time"
 
-	"github.com/rs/zerolog/log"
-	"github.com/tomasen/realip"
+	"github.com/gorilla/schema"
+	"golang.org/x/xerrors"
 
 	"github.com/bots-house/webshot/internal/renderer"
 )
 
+type ScreenshotInput struct {
+	URL string `schema:"url,required"`
+
+	Width  int     `schema:"width"`
+	Height int     `schema:"height"`
+	Scale  float64 `schema:"scale"`
+
+	Format  renderer.ImageFormat `schema:"format"`
+	Quality int                  `schema:"quality"`
+
+	ClipX *float64 `schema:"clip_x"`
+	ClipY *float64 `schema:"clip_y"`
+
+	ClipWidth  *float64 `schema:"clip_width"`
+	ClipHeight *float64 `schema:"clip_height"`
+}
+
 func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		started := time.Now()
-
+	return handleError(func(w http.ResponseWriter, r *http.Request) error {
 		if err := r.ParseForm(); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			err = xerrors.Errorf("parse form: %w", err)
+			return httpError(err, http.StatusBadRequest)
 		}
 
-		url := r.Form.Get("url")
-		if url == "" {
-			http.Error(w, "missing required parameter `url`", http.StatusUnprocessableEntity)
-			return
+		input := &ScreenshotInput{}
+
+		if err := schema.NewDecoder().Decode(input, r.Form); err != nil {
+			err = xerrors.Errorf("decode form: %w", err)
+			return httpError(err, http.StatusUnprocessableEntity)
 		}
 
-		var opts renderer.Opts
-
-		width := r.Form.Get("width")
-		if width != "" {
-			var err error
-
-			opts.Width, err = strconv.Atoi(width)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `width` not is int: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-		}
-
-		height := r.Form.Get("height")
-		if height != "" {
-			var err error
-
-			opts.Height, err = strconv.Atoi(height)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `height` not is int: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-		}
-
-		scale := r.Form.Get("scale")
-		if scale != "" {
-			var err error
-
-			opts.Scale, err = strconv.ParseFloat(scale, 64)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `scale` not is float64: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-		}
-
-		opts.Format = renderer.ImageTypePNG
-		if v := r.Form.Get("format"); v != "" {
-			var err error
-			opts.Format, err = renderer.ParseImageType(v)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `format` is invalid: %s", v), http.StatusUnprocessableEntity)
-				return
-			}
-		}
-
-		if v := r.Form.Get("quality"); v != "" {
-			var err error
-			opts.Quality, err = strconv.Atoi(v)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `quality` is not int: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-		}
-
-		if v := r.Form.Get("clip_x"); v != "" {
-			var err error
-
-			x, err := strconv.ParseFloat(v, 64)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `clip_x` is not float64: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-
-			opts.Clip.SetX(x)
-		}
-
-		if v := r.Form.Get("clip_y"); v != "" {
-			var err error
-
-			y, err := strconv.ParseFloat(v, 64)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `clip_y` is not float64: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-
-			opts.Clip.SetY(y)
-		}
-
-		if v := r.Form.Get("clip_width"); v != "" {
-			var err error
-
-			y, err := strconv.ParseFloat(v, 64)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `clip_width` is not float64: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-
-			opts.Clip.SetWidth(y)
-		}
-
-		if v := r.Form.Get("clip_height"); v != "" {
-			var err error
-
-			y, err := strconv.ParseFloat(v, 64)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("parameter `clip_height` is not float64: %v", err), http.StatusUnprocessableEntity)
-				return
-			}
-
-			opts.Clip.SetHeight(y)
+		opts := renderer.Opts{
+			Width:   input.Width,
+			Height:  input.Height,
+			Scale:   input.Scale,
+			Format:  input.Format,
+			Quality: input.Quality,
+			Clip: renderer.OptsClip{
+				X:      input.ClipX,
+				Y:      input.ClipY,
+				Width:  input.ClipWidth,
+				Height: input.ClipHeight,
+			},
 		}
 
 		if err := opts.Validate(); err != nil {
-			http.Error(w, fmt.Sprintf("validate clip opts: %v", err), http.StatusUnprocessableEntity)
-			return
+			err = xerrors.Errorf("validate opts: %w", err)
+			return httpError(err, http.StatusUnprocessableEntity)
 		}
 
-		log.Info().
-			Str("url", url).
-			Int("width", opts.Width).
-			Int("height", opts.Height).
-			Float64("scale", opts.Scale).
-			Str("format", opts.Format.String()).
-			Bool("clip", opts.Clip.IsSet()).
-			Str("ip", realip.FromRequest(r)).
-			Msg("screenshot call")
-
-		// if err := json.NewEncoder(w).Encode(struct {
-		// 	URL  string
-		// 	Opts renderer.Opts
-		// }{
-		// 	URL:  url,
-		// 	Opts: opts,
-		// }); err != nil {
-		// 	log.Printf("dump request error: %v", err)
-		// }
 		ctx := r.Context()
 
-		output, err := rndr.Render(ctx, url, &opts)
+		output, err := rndr.Render(ctx, input.URL, &opts)
 		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("render error")
-			http.Error(w, fmt.Sprintf("render error: %v", err), http.StatusInternalServerError)
-			return
+			return xerrors.Errorf("render error: %w", err)
 		}
 
 		w.Header().Set("Content-Type", opts.Format.ContentType())
 
-		n, err := io.Copy(w, output)
+		_, err = io.Copy(w, output)
 		if err != nil {
-			log.Ctx(ctx).Error().Err(err).Msg("copy output")
-			return
+			return xerrors.Errorf("copy output: %w", err)
 		}
 
-		log.Ctx(ctx).Debug().Int64("size", n).Dur("took", time.Since(started)).Msg("image generated")
+		return nil
 	})
 }

@@ -25,6 +25,11 @@ func ParseImageType(v string) (ImageFormat, error) {
 	}
 }
 
+func (it *ImageFormat) UnmarshalText(text []byte) (err error) {
+	*it, err = ParseImageType(string(text))
+	return
+}
+
 func (it ImageFormat) ContentType() string {
 	switch it {
 	case ImageTypePNG:

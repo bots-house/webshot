@@ -140,6 +140,8 @@ func listenAndServe(ctx context.Context, addr string, handler http.Handler) erro
 }
 
 func withLogger(ctx context.Context, config Config) context.Context {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	if config.Log.Pretty {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
