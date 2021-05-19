@@ -3,6 +3,7 @@ module github.com/bots-house/webshot
 go 1.16
 
 require (
+	github.com/aws/aws-sdk-go v1.38.39
 	github.com/chromedp/cdproto v0.0.0-20210508221054-d7cfa85db7d1
 	github.com/chromedp/chromedp v0.7.2
 	github.com/gorilla/schema v1.2.0

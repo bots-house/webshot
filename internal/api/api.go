@@ -5,16 +5,12 @@ import (
 	"net/http"
 
 	"github.com/bots-house/webshot/internal/api/middleware"
-	"github.com/bots-house/webshot/internal/renderer"
+	"github.com/bots-house/webshot/internal/service"
 	"github.com/justinas/alice"
 	"github.com/rs/zerolog/log"
 )
 
-type Deps struct {
-	Renderer renderer.Renderer
-}
-
-func New(deps Deps) *http.ServeMux {
+func New(srv *service.Service) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	chain := alice.New(
@@ -22,7 +18,7 @@ func New(deps Deps) *http.ServeMux {
 	)
 
 	mux.Handle("/", chain.Then(IndexHandler()))
-	mux.Handle("/screenshot", chain.Then(ScreenshotHandler(deps.Renderer)))
+	mux.Handle("/screenshot", chain.Then(ScreenshotHandler(srv)))
 
 	return mux
 }

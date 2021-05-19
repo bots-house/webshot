@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  chrome:
+    image: browserless/chrome
+    ports: 
+      - 3000:3000
+    environment: 
+      PREBOOT_CHROME: 'true'
+      MAX_CONCURRENT_SESSIONS: 2
+      FUNCTION_ENABLE_INCOGNITO_MODE: 'true'
+      KEEP_ALIVE: 'true'
+      
+  # chrome:
+  #   image: chromedp/headless-shell:stable
+  #   command: 
+  #    - --disable-renderer-backgrounding 
+  #    - --mute-audio 
+  #    - --enable-features=NetworkService,NetworkServiceInProcess 
+  #    - --disable-features=site-per-process,Translate,BlinkGenPropertyTrees 
+  #    - --disable-ipc-flooding-protection 
+  #    - --disable-prompt-on-repost 
+  #    - --disable-backgrounding-occluded-windows 
+  #    - --disable-extensions 
+  #    - --disable-hang-monitor 
+  #    - --safebrowsing-disable-auto-update 
+  #    - --enable-automation 
+  #    - --no-first-run 
+  #    - --hide-scrollbars 
+  #    - --disable-background-networking 
+  #    - --metrics-recording-only 
+  #    - --password-store=basic 
+  #    - --no-default-browser-check 
+  #    - --disable-breakpad 
+  #    - --disable-client-side-phishing-detection 
+  #    - --disable-dev-shm-usage 
+  #    - --headless 
+  #    - --disable-background-timer-throttling 
+  #    - --disable-default-apps 
+  #    - --disable-popup-blocking 
+  #    - --force-color-profile=srgb 
+  #    - --disable-sync 
+  #    - --use-mock-keychain 
+  #    - --remote-debugging-port=9222 
+  #    - --incognito
+  #   ports:
+  #     - 9222:9222
