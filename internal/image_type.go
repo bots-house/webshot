@@ -10,13 +10,16 @@ type ImageFormat int8
 const (
 	ImageFormatPNG ImageFormat = iota
 	ImageFormatJPEG
+
+	pngFormat  = "png"
+	jpegFormat = "jpeg"
 )
 
 func ParseImageType(v string) (ImageFormat, error) {
 	switch strings.ToLower(v) {
-	case "png":
+	case pngFormat:
 		return ImageFormatPNG, nil
-	case "jpeg":
+	case jpegFormat:
 		return ImageFormatJPEG, nil
 	default:
 		return ImageFormat(-1), fmt.Errorf("unsupported image type: %s", v)
@@ -31,9 +34,9 @@ func (it *ImageFormat) UnmarshalText(text []byte) (err error) {
 func (it ImageFormat) Ext() string {
 	switch it {
 	case ImageFormatPNG:
-		return "png"
+		return pngFormat
 	case ImageFormatJPEG:
-		return "jpeg"
+		return jpegFormat
 	default:
 		return "bin"
 	}
@@ -53,9 +56,9 @@ func (it ImageFormat) ContentType() string {
 func (it ImageFormat) String() string {
 	switch it {
 	case ImageFormatJPEG:
-		return "jpeg"
+		return jpegFormat
 	case ImageFormatPNG:
-		return "png"
+		return pngFormat
 	default:
 		return "unknown"
 	}

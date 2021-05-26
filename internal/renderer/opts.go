@@ -2,7 +2,7 @@ package renderer
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"io"
 	"strconv"
@@ -42,15 +42,15 @@ func (opts Opts) Hash() string {
 	buf.WriteString(strconv.FormatFloat(float64(opts.Quality), 'f', -1, 64))
 
 	if opts.Clip.IsSet() {
-		buf.WriteString(strconv.FormatFloat(float64(*opts.Clip.X), 'f', -1, 64))
-		buf.WriteString(strconv.FormatFloat(float64(*opts.Clip.Y), 'f', -1, 64))
-		buf.WriteString(strconv.FormatFloat(float64(*opts.Clip.Width), 'f', -1, 64))
-		buf.WriteString(strconv.FormatFloat(float64(*opts.Clip.Height), 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.X, 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.Y, 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.Width, 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.Height, 'f', -1, 64))
 	}
 
-	h := sha1.New()
+	h := sha256.New()
 
-	io.Copy(h, buf)
+	_, _ = io.Copy(h, buf)
 
 	return hex.EncodeToString(h.Sum(nil))
 }

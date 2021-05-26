@@ -190,7 +190,7 @@ func newRenderer(ctx context.Context, cfg Config) (renderer.Renderer, error) {
 	return &renderer.Chrome{Resolver: resolver}, nil
 }
 
-func newStorage(ctx context.Context, cfg Config) (storage.Storage, error) {
+func newStorage(_ context.Context, cfg Config) (storage.Storage, error) {
 	if cfg.Storage.S3.Key == "" {
 		return nil, nil
 	}

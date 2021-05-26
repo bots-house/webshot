@@ -3,7 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -26,6 +26,7 @@ const (
 	defaultCacheControlMaxAge = 3600 * 24 * 360
 	fileMetadataLatestKey     = "Latest"
 	fileMetadataTTLKey        = "Ttl"
+	hashFirstChars            = 15
 )
 
 type S3 struct {
@@ -111,25 +112,25 @@ func (s *S3) Get(ctx context.Context, in Meta) (io.Reader, error) {
 }
 
 func (s *S3) getLinkPath(in Meta) string {
-	h := sha1.New()
+	h := sha256.New()
 	h.Write([]byte(in.URL.String()))
 	h.Write([]byte(in.Opts))
 	hash := hex.EncodeToString(h.Sum(nil))
 
-	p := fmt.Sprintf("/%s/%s.link", in.URL.Hostname(), hash)
+	p := fmt.Sprintf("/%s/%s.link", in.URL.Hostname(), hash[:hashFirstChars])
 
 	return path.Join(s.subdir, p)
 }
 
 func (s *S3) getFilePath(in Meta) string {
-	h := sha1.New()
+	h := sha256.New()
 	h.Write([]byte(in.URL.String()))
 	h.Write([]byte(in.Opts))
 	hash := hex.EncodeToString(h.Sum(nil))
 
 	loc := fmt.Sprintf("/%s/%s.%s.%s",
 		in.URL.Hostname(),
-		hash,
+		hash[:hashFirstChars],
 		xid.New().String(),
 		in.Format.Ext(),
 	)
