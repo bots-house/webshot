@@ -24,6 +24,10 @@ import (
 )
 
 type Config struct {
+	Auth struct {
+		SignKey string `long:"sign-key" description:"require HMAC request signature" env:"SIGN_KEY"`
+	} `group:"Auth" namespace:"auth" env-namespace:"AUTH"`
+
 	HTTP struct {
 		Addr string `long:"addr" description:"http addr to listen" env:"ADDR" default:":8000"`
 	} `group:"HTTP" namespace:"http" env-namespace:"HTTP"`
