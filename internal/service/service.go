@@ -9,6 +9,7 @@ import (
 
 	"github.com/bots-house/webshot/internal/renderer"
 	"github.com/bots-house/webshot/internal/storage"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/xerrors"
 )
 
@@ -55,12 +56,7 @@ func (srv *Service) Shot(
 		Format: opts.Render.Format,
 	}
 
-	exists, err := srv.Storage.Has(ctx, meta)
-	if err != nil {
-		return nil, xerrors.Errorf("check if object exists: %w", err)
-	}
-
-	if opts.Cache.Fresh || !exists {
+	renderAndSave := func(ctx context.Context) (io.Reader, error) {
 		output, err := srv.Renderer.Render(ctx, targetURL, opts.Render)
 		if err != nil {
 			return nil, xerrors.Errorf("render error: %w", err)
@@ -77,8 +73,17 @@ func (srv *Service) Shot(
 		return bytes.NewReader(output), nil
 	}
 
+	// if client want fresh screen
+	if opts.Cache.Fresh {
+		return renderAndSave(ctx)
+	}
+
+	// try to use cached image
 	body, err := srv.Storage.Get(ctx, meta)
-	if err != nil {
+	if err == storage.ErrFileNotFound || err == storage.ErrFileExpired || err == storage.ErrFileCorrupted {
+		log.Ctx(ctx).Debug().Err(err).Msg("something wrong with file, render new")
+		return renderAndSave(ctx)
+	} else if err != nil {
 		return nil, xerrors.Errorf("storage get: %w", err)
 	}
 

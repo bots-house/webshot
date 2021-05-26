@@ -2,9 +2,6 @@ package storage
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
-	"fmt"
 	"io"
 	"net/url"
 	"time"
@@ -13,6 +10,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// Meta contains metadata about screenshot
 type Meta struct {
 	// URL of target site
 	URL *url.URL
@@ -24,31 +22,22 @@ type Meta struct {
 	Format internal.ImageFormat
 }
 
+// Upload define object to upload to s3.
 type Upload struct {
 	Meta
 	TTL  time.Duration
 	Body io.Reader
 }
 
-func (f *Meta) Path() string {
-	h := sha1.New()
-	h.Write([]byte(f.URL.String()))
-	h.Write([]byte(f.Opts))
-	hash := hex.EncodeToString(h.Sum(nil))
-
-	return fmt.Sprintf("/%s/%s.%s", f.URL.Hostname(), hash, f.Format.Ext())
-}
-
 var (
-	ErrFileNotFound = xerrors.New("file not found")
+	ErrFileNotFound  = xerrors.New("file not found")
+	ErrFileCorrupted = xerrors.New("file corrupted")
+	ErrFileExpired   = xerrors.New("file expired")
 )
 
 type Storage interface {
 	// Get returns URL of file in storage if it exists
 	Get(ctx context.Context, meta Meta) (io.Reader, error)
-
-	// Has file or not
-	Has(ctx context.Context, meta Meta) (bool, error)
 
 	// Put image to storage
 	Upload(ctx context.Context, upload Upload) error

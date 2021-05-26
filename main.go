@@ -119,7 +119,6 @@ func run(ctx context.Context, config Config) error {
 	}
 
 	api := api.New(srv)
-
 	return listenAndServe(ctx, config.HTTP.Addr, api)
 }
 
