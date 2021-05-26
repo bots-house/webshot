@@ -24,7 +24,7 @@ services:
       STORAGE_S3_BUCKET: ${STORAGE_S3_BUCKET}
       STORAGE_S3_ENDPOINT: ${STORAGE_S3_ENDPOINT}
       STORAGE_S3_SUBDIR: ${STORAGE_S3_SUBDIR}
-
+      BROWSER_ADDR: http://chrome:3000
       LOG_DEBUG: 'true'
 
     deploy:
@@ -41,10 +41,6 @@ services:
         constraints:
           - node.role == worker
           - node.labels.env == production-mix
-      
-      resources:
-        limits:
-          memory: 200M
 
       labels:
         - traefik.enable=true
@@ -57,3 +53,28 @@ services:
         - traefik.http.routers.webshot-https.tls=true
         - traefik.http.routers.webshot-https.tls.certresolver=le
         - traefik.http.services.webshot.loadbalancer.server.port=8000
+  
+  chrome:
+    image: browserless/chrome
+    networks: [default]
+    environment: 
+      MAX_CONCURRENT_SESSIONS: 10
+
+    deploy:
+      replicas: 1
+    
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+      restart_policy:
+        condition: on-failure
+
+      placement:
+        constraints:
+          - node.role == worker
+          - node.labels.env == staging-mix
+      
+      resources:
+        limits:
+          memory: 500M
