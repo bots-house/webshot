@@ -31,6 +31,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 FROM chromedp/headless-shell:90.0.4430.212
 
 COPY --from=builder /bin/webshot /bin/webshot
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "/bin/webshot", "-health" ]
 
