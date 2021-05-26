@@ -1,56 +1,15 @@
 package renderer
 
 import (
-	"fmt"
-	"strings"
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"io"
+	"strconv"
 
+	"github.com/bots-house/webshot/internal"
 	"golang.org/x/xerrors"
 )
-
-type ImageFormat int8
-
-const (
-	ImageTypePNG ImageFormat = iota
-	ImageTypeJPEG
-)
-
-func ParseImageType(v string) (ImageFormat, error) {
-	switch strings.ToLower(v) {
-	case "png":
-		return ImageTypePNG, nil
-	case "jpeg":
-		return ImageTypeJPEG, nil
-	default:
-		return ImageFormat(-1), fmt.Errorf("unsupported image type: %s", v)
-	}
-}
-
-func (it *ImageFormat) UnmarshalText(text []byte) (err error) {
-	*it, err = ParseImageType(string(text))
-	return
-}
-
-func (it ImageFormat) ContentType() string {
-	switch it {
-	case ImageTypePNG:
-		return "image/png"
-	case ImageTypeJPEG:
-		return "image/jpeg"
-	default:
-		return "application/octet-stream"
-	}
-}
-
-func (it ImageFormat) String() string {
-	switch it {
-	case ImageTypeJPEG:
-		return "jpeg"
-	case ImageTypePNG:
-		return "png"
-	default:
-		return "unknown"
-	}
-}
 
 type Opts struct {
 	// Viewport width in pixels of the browser render. Default is 1680
@@ -63,7 +22,7 @@ type Opts struct {
 	Scale float64
 
 	// Format of image
-	Format ImageFormat
+	Format internal.ImageFormat
 
 	// Quality of image
 	Quality int
@@ -71,6 +30,29 @@ type Opts struct {
 	// Clip of viewport.
 	// All fields is required.
 	Clip OptsClip
+}
+
+func (opts Opts) Hash() string {
+	buf := &bytes.Buffer{}
+
+	buf.WriteString(strconv.Itoa(opts.getWidth()))
+	buf.WriteString(strconv.Itoa(opts.getHeight()))
+	buf.WriteString(strconv.FormatFloat(opts.getScale(), 'f', -1, 64))
+	buf.WriteString(opts.Format.String())
+	buf.WriteString(strconv.FormatFloat(float64(opts.Quality), 'f', -1, 64))
+
+	if opts.Clip.IsSet() {
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.X, 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.Y, 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.Width, 'f', -1, 64))
+		buf.WriteString(strconv.FormatFloat(*opts.Clip.Height, 'f', -1, 64))
+	}
+
+	h := sha256.New()
+
+	_, _ = io.Copy(h, buf)
+
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func (opts *Opts) Validate() error {

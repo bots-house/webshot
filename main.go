@@ -10,8 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/bots-house/webshot/internal/api"
 	"github.com/bots-house/webshot/internal/renderer"
+	"github.com/bots-house/webshot/internal/service"
+	"github.com/bots-house/webshot/internal/storage"
 	"github.com/jessevdk/go-flags"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -26,6 +31,17 @@ type Config struct {
 	Browser struct {
 		Addr string `long:"addr" description:"remote browser connection string. Allowed is ws://... or http://" env:"ADDR"`
 	} `group:"Browser" namespace:"browser" env-namespace:"BROWSER"`
+
+	Storage struct {
+		S3 struct {
+			Key      string `long:"key" description:"s3 key" env:"KEY"`
+			Secret   string `long:"secret" description:"s3 secret" env:"SECRET"`
+			Region   string `long:"region" description:"s3 region" env:"REGION"`
+			Bucket   string `long:"bucket" description:"s3 bucket" env:"BUCKET"`
+			Endpoint string `long:"endpoint" description:"s3 endpoint" env:"ENDPOINT"`
+			Subdir   string `long:"subdir" description:"s3 bucket subdir" env:"SUBDIR"`
+		} `group:"S3" namespace:"s3" env-namespace:"S3"`
+	} `group:"Storage" namespace:"storage" env-namespace:"STORAGE"`
 
 	Log struct {
 		Pretty bool `long:"pretty" description:"enable pretty logging" env:"PRETTY"`
@@ -87,21 +103,22 @@ func main() {
 
 func run(ctx context.Context, config Config) error {
 
-	var resolver renderer.ChromeResolver
-	if config.Browser.Addr != "" {
-		log.Ctx(ctx).Info().Str("addr", config.Browser.Addr).Msg("use chrome remote resolver")
-
-		var err error
-		resolver, err = renderer.NewChromeResolver(config.Browser.Addr)
-		if err != nil {
-			return xerrors.Errorf("new chrome resolver '%s': %w", config.Browser.Addr, err)
-		}
+	storage, err := newStorage(ctx, config)
+	if err != nil {
+		return xerrors.Errorf("new storage: %w", err)
 	}
 
-	rndr := &renderer.Chrome{Debug: false, Resolver: resolver}
+	renderer, err := newRenderer(ctx, config)
+	if err != nil {
+		return xerrors.Errorf("new renderer: %w", err)
+	}
 
-	api := api.New(api.Deps{Renderer: rndr})
+	srv := &service.Service{
+		Renderer: renderer,
+		Storage:  storage,
+	}
 
+	api := api.New(srv)
 	return listenAndServe(ctx, config.HTTP.Addr, api)
 }
 
@@ -139,18 +156,65 @@ func listenAndServe(ctx context.Context, addr string, handler http.Handler) erro
 	}
 }
 
-func withLogger(ctx context.Context, config Config) context.Context {
+func withLogger(ctx context.Context, cfg Config) context.Context {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	if config.Log.Pretty {
+	if cfg.Log.Pretty {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
-	if config.Log.Debug {
+	if cfg.Log.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
 	return log.Logger.WithContext(ctx)
+}
+
+func newRenderer(ctx context.Context, cfg Config) (renderer.Renderer, error) {
+	var resolver renderer.ChromeResolver
+
+	if cfg.Browser.Addr != "" {
+		log.Ctx(ctx).Info().Str("addr", cfg.Browser.Addr).Msg("init remote chrome renderer")
+
+		var err error
+		resolver, err = renderer.NewChromeResolver(cfg.Browser.Addr)
+		if err != nil {
+			return nil, xerrors.Errorf("new chrome resolver '%s': %w", cfg.Browser.Addr, err)
+		}
+	} else {
+		log.Ctx(ctx).Info().Msg("init local chrome renderer")
+	}
+
+	return &renderer.Chrome{Resolver: resolver}, nil
+}
+
+func newStorage(_ context.Context, cfg Config) (storage.Storage, error) {
+	if cfg.Storage.S3.Key == "" {
+		return nil, nil
+	}
+
+	log.Info().
+		Str("endpoint", cfg.Storage.S3.Endpoint).
+		Str("region", cfg.Storage.S3.Region).
+		Str("bucket", cfg.Storage.S3.Bucket).
+		Msg("init s3 storage")
+
+	awsConfig := &aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			cfg.Storage.S3.Key,
+			cfg.Storage.S3.Secret,
+			"",
+		),
+		Endpoint: aws.String(cfg.Storage.S3.Endpoint),
+		Region:   aws.String(cfg.Storage.S3.Region),
+	}
+
+	awsSession, err := session.NewSession(awsConfig)
+	if err != nil {
+		return nil, xerrors.Errorf("aws new session: %w", err)
+	}
+
+	return storage.NewS3(awsSession, cfg.Storage.S3.Bucket, cfg.Storage.S3.Subdir), nil
 }

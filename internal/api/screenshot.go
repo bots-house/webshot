@@ -3,11 +3,14 @@ package api
 import (
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/schema"
 	"golang.org/x/xerrors"
 
+	"github.com/bots-house/webshot/internal"
 	"github.com/bots-house/webshot/internal/renderer"
+	"github.com/bots-house/webshot/internal/service"
 )
 
 type ScreenshotInput struct {
@@ -17,7 +20,7 @@ type ScreenshotInput struct {
 	Height int     `schema:"height"`
 	Scale  float64 `schema:"scale"`
 
-	Format  renderer.ImageFormat `schema:"format"`
+	Format  internal.ImageFormat `schema:"format"`
 	Quality int                  `schema:"quality"`
 
 	ClipX *float64 `schema:"clip_x"`
@@ -25,9 +28,12 @@ type ScreenshotInput struct {
 
 	ClipWidth  *float64 `schema:"clip_width"`
 	ClipHeight *float64 `schema:"clip_height"`
+
+	Fresh bool `schema:"fresh"`
+	TTL   int  `schem:"ttl"`
 }
 
-func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
+func ScreenshotHandler(srv *service.Service) http.Handler {
 	return handleError(func(w http.ResponseWriter, r *http.Request) error {
 		if err := r.ParseForm(); err != nil {
 			err = xerrors.Errorf("parse form: %w", err)
@@ -41,7 +47,7 @@ func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 			return httpError(err, http.StatusUnprocessableEntity)
 		}
 
-		opts := renderer.Opts{
+		renderOpts := renderer.Opts{
 			Width:   input.Width,
 			Height:  input.Height,
 			Scale:   input.Scale,
@@ -55,19 +61,28 @@ func ScreenshotHandler(rndr renderer.Renderer) http.Handler {
 			},
 		}
 
-		if err := opts.Validate(); err != nil {
+		if err := renderOpts.Validate(); err != nil {
 			err = xerrors.Errorf("validate opts: %w", err)
 			return httpError(err, http.StatusUnprocessableEntity)
 		}
 
+		cacheOpts := service.CacheOpts{
+			TTL:   time.Second * time.Duration(input.TTL),
+			Fresh: input.Fresh,
+		}
+
 		ctx := r.Context()
 
-		output, err := rndr.Render(ctx, input.URL, &opts)
+		output, err := srv.Shot(ctx, input.URL, service.ShotOpts{
+			Render: renderOpts,
+			Cache:  cacheOpts,
+		})
+
 		if err != nil {
 			return xerrors.Errorf("render error: %w", err)
 		}
 
-		w.Header().Set("Content-Type", opts.Format.ContentType())
+		w.Header().Set("Content-Type", renderOpts.Format.ContentType())
 
 		_, err = io.Copy(w, output)
 		if err != nil {

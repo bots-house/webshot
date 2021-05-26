@@ -1,12 +1,11 @@
 package renderer
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"time"
 
+	"github.com/bots-house/webshot/internal"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/rs/zerolog"
@@ -43,8 +42,8 @@ func (chrome *Chrome) buildContextOptions() []chromedp.ContextOption {
 func (chrome *Chrome) Render(
 	ctx context.Context,
 	url string,
-	opts *Opts,
-) (r io.Reader, err error) {
+	opts Opts,
+) (c []byte, err error) {
 	defer func(started time.Time) {
 		var ev *zerolog.Event
 
@@ -125,14 +124,14 @@ func (chrome *Chrome) Render(
 	actions = append(actions, logAction(ctx,
 		"screenshot",
 		nil,
-		captureScreenshot(&res, opts),
+		captureScreenshot(&res, &opts),
 	))
 
 	if err := chromedp.Run(ctx, actions...); err != nil {
 		return nil, xerrors.Errorf("make screen shot: %w", err)
 	}
 
-	return bytes.NewReader(res), nil
+	return res, nil
 }
 
 type logFields map[string]interface{}
@@ -166,9 +165,9 @@ func captureScreenshot(res *[]byte, opts *Opts) chromedp.Action {
 		call := page.CaptureScreenshot()
 
 		switch opts.Format {
-		case ImageTypeJPEG:
+		case internal.ImageFormatJPEG:
 			call = call.WithFormat(page.CaptureScreenshotFormatJpeg)
-		case ImageTypePNG:
+		case internal.ImageFormatPNG:
 			call = call.WithFormat(page.CaptureScreenshotFormatPng)
 		}
 
