@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func New(srv *service.Service) *http.ServeMux {
+func New(srv *service.Service, auth Auth) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	chain := alice.New(
@@ -18,7 +18,7 @@ func New(srv *service.Service) *http.ServeMux {
 	)
 
 	mux.Handle("/", chain.Then(IndexHandler()))
-	mux.Handle("/screenshot", chain.Then(ScreenshotHandler(srv)))
+	mux.Handle("/screenshot", chain.Then(ScreenshotHandler(srv, auth)))
 
 	return mux
 }

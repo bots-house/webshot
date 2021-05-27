@@ -14,7 +14,7 @@
       <div class="container">
         <h1 class="title has-text-centered"">WebShot API</h1>
 
-        <form action="/screenshot" class="box">
+        <form action=" /screenshot" class="box">
           <div class="field">
             <label class="label">URL</label>
             <div class="control">
@@ -60,17 +60,40 @@
             </div>
           </div>
 
-          <div id="link-message-root">
-            
+          <div class="field is-grouped">
+            <div class="field control">
+              <label for="ttl" class="label">TTL</label>
+              <input id="ttl" name="ttl" type="number" class="input" min="60" value="2592000" step="60" required>
+            </div>
+            <div class="field control">
+              <label class="checkbox is-large">
+                <input name="fresh" type="checkbox">
+                Fresh?
+              </label>
+            </div>
           </div>
 
-        </form>
+          <div class="field is-grouped">
+            <div class="control">
+              <label for="key" class="label">Key</label>
+              <input id="key" name="key" type="text" class="input">
+            </div>
+          </div>
 
-        
+          <div id="link-message-root">
+
+          </div>
+
+          </form>
+
+
       </div>
     </div>
   </section>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"
+    integrity="sha512-szJ5FSo9hEmXXe7b5AUVtn/WnL8a5VofnFeYC2i2z03uS2LhAch7ewNLbl5flsEmTTimMN0enBZg/3sQ+YOSzQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="/js/builder.js"></script>
 </body>
 
