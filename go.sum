@@ -1,5 +1,5 @@
-github.com/aws/aws-sdk-go v1.38.39 h1:n4jkKlE3DfZBN800njuHmOEQlDht4aO/kE2VNk0/6T4=
-github.com/aws/aws-sdk-go v1.38.39/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
+github.com/aws/aws-sdk-go v1.38.49 h1:E31vxjCe6a5I+mJLmUGaZobiWmg9KdWaud9IfceYeYQ=
+github.com/aws/aws-sdk-go v1.38.49/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/chromedp/cdproto v0.0.0-20210508221054-d7cfa85db7d1 h1:EqxjOTf4Eh30cZ9OqA7pBzKEv3d+QDz0t/1HeRK/IaM=
 github.com/chromedp/cdproto v0.0.0-20210508221054-d7cfa85db7d1/go.mod h1:At5TxYYdxkbQL0TSefRjhLE3Q0lgvqKKMSFUglJ7i1U=
 github.com/chromedp/chromedp v0.7.2 h1:uNztM7xDJex+Mu0JUbpBDS7uCN/J71ZiCiJyHUwdrHg=
