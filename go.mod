@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.38.39
 	github.com/chromedp/cdproto v0.0.0-20210508221054-d7cfa85db7d1
 	github.com/chromedp/chromedp v0.7.2
+	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/gorilla/schema v1.2.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/justinas/alice v1.2.0

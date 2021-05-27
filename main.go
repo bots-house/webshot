@@ -122,7 +122,18 @@ func run(ctx context.Context, config Config) error {
 		Storage:  storage,
 	}
 
-	api := api.New(srv)
+	var apiAuth api.Auth
+
+	if config.Auth.SignKey != "" {
+		log.Ctx(ctx).Info().Msg("sign key is provided, auth is required")
+
+		apiAuth = api.NewAuthHMAC(config.Auth.SignKey, "sign")
+	} else {
+		log.Ctx(ctx).Warn().Msg("sign key is not provided, auth is not required")
+	}
+
+	api := api.New(srv, apiAuth)
+
 	return listenAndServe(ctx, config.HTTP.Addr, api)
 }
 

@@ -30,11 +30,13 @@ type ScreenshotInput struct {
 	ClipHeight *float64 `schema:"clip_height"`
 
 	Fresh bool `schema:"fresh"`
-	TTL   int  `schem:"ttl"`
+	TTL   int  `schema:"ttl"`
 }
 
-func ScreenshotHandler(srv *service.Service) http.Handler {
+func ScreenshotHandler(srv *service.Service, auth Auth) http.Handler {
 	return handleError(func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
+
 		if err := r.ParseForm(); err != nil {
 			err = xerrors.Errorf("parse form: %w", err)
 			return httpError(err, http.StatusBadRequest)
@@ -42,9 +44,19 @@ func ScreenshotHandler(srv *service.Service) http.Handler {
 
 		input := &ScreenshotInput{}
 
-		if err := schema.NewDecoder().Decode(input, r.Form); err != nil {
+		decoder := schema.NewDecoder()
+		decoder.IgnoreUnknownKeys(true)
+
+		if err := decoder.Decode(input, r.Form); err != nil {
 			err = xerrors.Errorf("decode form: %w", err)
 			return httpError(err, http.StatusUnprocessableEntity)
+		}
+
+		if auth != nil {
+			if err := auth.Allow(ctx, r); err != nil {
+				err = xerrors.Errorf("unathorized: %w", err)
+				return httpError(err, http.StatusUnauthorized)
+			}
 		}
 
 		renderOpts := renderer.Opts{
@@ -70,8 +82,6 @@ func ScreenshotHandler(srv *service.Service) http.Handler {
 			TTL:   time.Second * time.Duration(input.TTL),
 			Fresh: input.Fresh,
 		}
-
-		ctx := r.Context()
 
 		output, err := srv.Shot(ctx, input.URL, service.ShotOpts{
 			Render: renderOpts,
