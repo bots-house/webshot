@@ -59,11 +59,24 @@
                 required>
             </div>
           </div>
-          
+
+          <div class="field is-grouped">
+            <div class="field control">
+              <label for="ttl" class="label">TTL</label>
+              <input id="ttl" name="ttl" type="number" class="input" min="60" value="2592000" step="60" required>
+            </div>
+            <div class="field control">
+              <label class="checkbox is-large">
+                <input name="fresh" type="checkbox">
+                Fresh?
+              </label>
+            </div>
+          </div>
+
           <div class="field is-grouped">
             <div class="control">
               <label for="key" class="label">Key</label>
-              <input id="key" name="key" type="text" class="input" >
+              <input id="key" name="key" type="text" class="input">
             </div>
           </div>
 
