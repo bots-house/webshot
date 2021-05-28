@@ -60,7 +60,10 @@ func (chrome *Chrome) Render(
 			Int("height", opts.getHeight()).
 			Float64("scale", opts.getScale()).
 			Str("format", opts.Format.String()).
-			Dur("took", time.Since(started))
+			Dur("took", time.Since(started)).
+			Dur("delay", opts.Delay).
+			Bool("full_page", opts.FullPage).
+			Bool("scroll_page", opts.ScrollPage)
 
 		if opts.Clip.IsSet() {
 			ev = ev.
@@ -121,15 +124,39 @@ func (chrome *Chrome) Render(
 		),
 	))
 
-	res := []byte{}
+	if opts.ScrollPage {
+		actions = append(actions,
+			logAction(ctx,
+				"scroll to bottom",
+				nil,
+				chromedp.Evaluate(`
+					window.scrollTo(0, document.body.scrollHeight);
+				`, nil),
+			),
+			logAction(ctx,
+				"delay",
+				logFields{"v": opts.Delay.String()},
+				chromedp.Sleep(opts.Delay),
+			),
+			logAction(ctx,
+				"scroll to top",
+				nil,
+				chromedp.Evaluate(`
+					window.scrollTo(0, 0);
+				`, nil),
+			),
+		)
+	}
 
-	if opts.Delay != 0 {
+	if opts.Delay != 0 && !opts.ScrollPage {
 		actions = append(actions, logAction(ctx,
 			"delay",
 			logFields{"v": opts.Delay.String()},
 			chromedp.Sleep(opts.Delay),
 		))
 	}
+
+	var res []byte
 
 	if opts.FullPage {
 		actions = append(actions, logAction(ctx,

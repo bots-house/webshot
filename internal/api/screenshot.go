@@ -23,8 +23,9 @@ type ScreenshotInput struct {
 	Format  internal.ImageFormat `schema:"format"`
 	Quality int                  `schema:"quality"`
 
-	FullPage bool `schema:"full_page"`
-	Delay    int  `schema:"delay"`
+	ScrollPage bool `schema:"scroll_page"`
+	FullPage   bool `schema:"full_page"`
+	Delay      int  `schema:"delay"`
 
 	ClipX      *float64 `schema:"clip_x"`
 	ClipY      *float64 `schema:"clip_y"`
@@ -62,13 +63,14 @@ func ScreenshotHandler(srv *service.Service, auth Auth) http.Handler {
 		}
 
 		renderOpts := renderer.Opts{
-			Width:    input.Width,
-			Height:   input.Height,
-			Scale:    input.Scale,
-			Format:   input.Format,
-			Quality:  input.Quality,
-			Delay:    time.Millisecond * time.Duration(input.Delay),
-			FullPage: input.FullPage,
+			Width:      input.Width,
+			Height:     input.Height,
+			Scale:      input.Scale,
+			Format:     input.Format,
+			Quality:    input.Quality,
+			Delay:      time.Millisecond * time.Duration(input.Delay),
+			FullPage:   input.FullPage,
+			ScrollPage: input.ScrollPage,
 			Clip: renderer.OptsClip{
 				X:      input.ClipX,
 				Y:      input.ClipY,

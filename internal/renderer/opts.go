@@ -34,6 +34,9 @@ type Opts struct {
 	// Capture full page screenshot
 	FullPage bool
 
+	// Set this parameter to true to scroll through the entire page before capturing a screenshot.
+	ScrollPage bool
+
 	// Clip of viewport.
 	// All fields is required.
 	Clip OptsClip
@@ -49,6 +52,7 @@ func (opts Opts) Hash() string {
 	buf.WriteString(strconv.FormatFloat(float64(opts.Quality), 'f', -1, 64))
 	buf.WriteString(strconv.FormatInt(int64(opts.Delay.Seconds()), 10))
 	buf.WriteString(strconv.FormatBool(opts.FullPage))
+	buf.WriteString(strconv.FormatBool(opts.ScrollPage))
 
 	if opts.Clip.IsSet() {
 		buf.WriteString(strconv.FormatFloat(*opts.Clip.X, 'f', -1, 64))
