@@ -29,6 +29,8 @@ type ScreenshotInput struct {
 	ClipWidth  *float64 `schema:"clip_width"`
 	ClipHeight *float64 `schema:"clip_height"`
 
+	Delay int `schema:"delay"`
+
 	Fresh bool `schema:"fresh"`
 	TTL   int  `schema:"ttl"`
 }
@@ -65,6 +67,7 @@ func ScreenshotHandler(srv *service.Service, auth Auth) http.Handler {
 			Scale:   input.Scale,
 			Format:  input.Format,
 			Quality: input.Quality,
+			Delay:   time.Millisecond * time.Duration(input.Delay),
 			Clip: renderer.OptsClip{
 				X:      input.ClipX,
 				Y:      input.ClipY,

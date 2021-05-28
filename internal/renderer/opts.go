@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/bots-house/webshot/internal"
 	"golang.org/x/xerrors"
@@ -27,6 +28,9 @@ type Opts struct {
 	// Quality of image
 	Quality int
 
+	// Delay before take screenshot in seconds
+	Delay time.Duration
+
 	// Clip of viewport.
 	// All fields is required.
 	Clip OptsClip
@@ -40,6 +44,7 @@ func (opts Opts) Hash() string {
 	buf.WriteString(strconv.FormatFloat(opts.getScale(), 'f', -1, 64))
 	buf.WriteString(opts.Format.String())
 	buf.WriteString(strconv.FormatFloat(float64(opts.Quality), 'f', -1, 64))
+	buf.WriteString(strconv.FormatInt(int64(opts.Delay.Seconds()), 10))
 
 	if opts.Clip.IsSet() {
 		buf.WriteString(strconv.FormatFloat(*opts.Clip.X, 'f', -1, 64))

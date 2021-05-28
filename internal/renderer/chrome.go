@@ -121,6 +121,14 @@ func (chrome *Chrome) Render(
 
 	res := []byte{}
 
+	if opts.Delay != 0 {
+		actions = append(actions, logAction(ctx,
+			"delay",
+			logFields{"v": opts.Delay.String()},
+			chromedp.Sleep(opts.Delay),
+		))
+	}
+
 	actions = append(actions, logAction(ctx,
 		"screenshot",
 		nil,
