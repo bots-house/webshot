@@ -31,6 +31,9 @@ type Opts struct {
 	// Delay before take screenshot in seconds
 	Delay time.Duration
 
+	// Capture full page screenshot
+	FullPage bool
+
 	// Clip of viewport.
 	// All fields is required.
 	Clip OptsClip
@@ -45,6 +48,7 @@ func (opts Opts) Hash() string {
 	buf.WriteString(opts.Format.String())
 	buf.WriteString(strconv.FormatFloat(float64(opts.Quality), 'f', -1, 64))
 	buf.WriteString(strconv.FormatInt(int64(opts.Delay.Seconds()), 10))
+	buf.WriteString(strconv.FormatBool(opts.FullPage))
 
 	if opts.Clip.IsSet() {
 		buf.WriteString(strconv.FormatFloat(*opts.Clip.X, 'f', -1, 64))
@@ -136,6 +140,10 @@ func (opts *Opts) getWidth() int {
 	}
 
 	return opts.Width
+}
+
+func (opts *Opts) hasWidth() bool {
+	return opts.Width != 0
 }
 
 func (opts *Opts) getHeight() int {

@@ -21,3 +21,4 @@ GET https://webshot.bots.house/screenshot
 | `clip_width`  | `float64` | Rectangle width in device independent pixels (dip).     |     null     |
 | `clip_height` | `float64` | Rectangle height in device independent pixels (dip).    |     null     |
 | `delay`       |   `int`   | Delay in milliseconds, to wait after the page is loaded |     null     |
+| `full_page`   |  `bool`   | Capture full page screenshot                            |    false     |
