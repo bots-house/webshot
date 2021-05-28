@@ -1,11 +1,11 @@
-# 📸 [WebShot](https://webshot.bots-house.services)
+# 📸 [WebShot](https://webshot.bots.house)
 
 Self-hosted web page screenshot generator.
 
 ## API
 
 ```http
-GET https://webshot.bots-house.services/screenshot
+GET https://webshot.bots.house/screenshot
 ```
 
 | Param     | Type      | Description                                     | Default |

@@ -51,7 +51,7 @@ services:
         - traefik.http.routers.webshot-https.rule=Host(`${DOMAIN?Variable not set}`)
         - traefik.http.routers.webshot-https.entrypoints=https
         - traefik.http.routers.webshot-https.tls=true
-        - traefik.http.routers.webshot-https.tls.certresolver=le
+        - traefik.http.routers.webshot-https.tls.certresolver=le-cf
         - traefik.http.services.webshot.loadbalancer.server.port=8000
   
   chrome:

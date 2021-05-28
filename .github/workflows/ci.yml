@@ -109,12 +109,12 @@ jobs:
           stack-file: .github/stack/stage.yml
 
           stack-vars: |
-            DOMAIN: webshot.${{ secrets.CLUSTER_PORTAINER_DOMAIN }}
+            DOMAIN: webshot.bots.house
             STORAGE_S3_KEY: ${{ secrets.STORAGE_S3_KEY }}
             STORAGE_S3_SECRET: ${{ secrets.STORAGE_S3_SECRET }}
             STORAGE_S3_REGION: ${{ secrets.STORAGE_S3_REGION }}
             STORAGE_S3_BUCKET: ${{ secrets.STORAGE_S3_BUCKET }}
             STORAGE_S3_ENDPOINT: ${{ secrets.STORAGE_S3_ENDPOINT }}
-            STORAGE_S3_SUBDIR: ${{ secrets.STAGE_STORAGE_S3_SUBDIR }}
+            STORAGE_S3_SUBDIR: ${{ secrets.STORAGE_S3_SUBDIR }}
 
           teams: Microservices
