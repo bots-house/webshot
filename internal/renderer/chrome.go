@@ -3,9 +3,11 @@ package renderer
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/bots-house/webshot/internal"
+	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/rs/zerolog"
@@ -58,7 +60,10 @@ func (chrome *Chrome) Render(
 			Int("height", opts.getHeight()).
 			Float64("scale", opts.getScale()).
 			Str("format", opts.Format.String()).
-			Dur("took", time.Since(started))
+			Dur("took", time.Since(started)).
+			Dur("delay", opts.Delay).
+			Bool("full_page", opts.FullPage).
+			Bool("scroll_page", opts.ScrollPage)
 
 		if opts.Clip.IsSet() {
 			ev = ev.
@@ -119,13 +124,53 @@ func (chrome *Chrome) Render(
 		),
 	))
 
-	res := []byte{}
+	if opts.ScrollPage {
+		actions = append(actions,
+			logAction(ctx,
+				"scroll to bottom",
+				nil,
+				chromedp.Evaluate(`
+					window.scrollTo(0, document.body.scrollHeight);
+				`, nil),
+			),
+			logAction(ctx,
+				"delay",
+				logFields{"v": opts.Delay.String()},
+				chromedp.Sleep(opts.Delay),
+			),
+			logAction(ctx,
+				"scroll to top",
+				nil,
+				chromedp.Evaluate(`
+					window.scrollTo(0, 0);
+				`, nil),
+			),
+		)
+	}
 
-	actions = append(actions, logAction(ctx,
-		"screenshot",
-		nil,
-		captureScreenshot(&res, &opts),
-	))
+	if opts.Delay != 0 && !opts.ScrollPage {
+		actions = append(actions, logAction(ctx,
+			"delay",
+			logFields{"v": opts.Delay.String()},
+			chromedp.Sleep(opts.Delay),
+		))
+	}
+
+	var res []byte
+
+	if opts.FullPage {
+		actions = append(actions, logAction(ctx,
+			"full page screenshot",
+			nil,
+			captureScreenshotFull(&res, &opts),
+		))
+	} else {
+		actions = append(actions, logAction(ctx,
+			"screenshot",
+			nil,
+			captureScreenshot(&res, &opts),
+		))
+	}
 
 	if err := chromedp.Run(ctx, actions...); err != nil {
 		return nil, xerrors.Errorf("make screen shot: %w", err)
@@ -151,6 +196,54 @@ func logAction(ctx context.Context, name string, fields logFields, action chrome
 		}(time.Now())
 
 		return action.Do(c)
+	})
+}
+
+// based on chromedp.FullScrenshot
+func captureScreenshotFull(res *[]byte, opts *Opts) chromedp.Action {
+	if res == nil {
+		panic("res cannot be nil")
+	}
+	return chromedp.ActionFunc(func(ctx context.Context) error {
+		// get layout metrics
+		_, _, contentSize, _, _, cssContentSize, err := page.GetLayoutMetrics().Do(ctx)
+		if err != nil {
+			return err
+		}
+		// protocol v90 changed the return parameter name (contentSize -> cssContentSize)
+		if cssContentSize != nil {
+			contentSize = cssContentSize
+		}
+		width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
+
+		if opts.hasWidth() {
+			width = int64(opts.getWidth())
+		}
+
+		// force viewport emulation
+		err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
+			WithScreenOrientation(&emulation.ScreenOrientation{
+				Type:  emulation.OrientationTypePortraitPrimary,
+				Angle: 0,
+			}).
+			Do(ctx)
+		if err != nil {
+			return err
+		}
+		// capture screenshot
+		*res, err = page.CaptureScreenshot().
+			WithQuality(int64(opts.Quality)).
+			WithClip(&page.Viewport{
+				X:      contentSize.X,
+				Y:      contentSize.Y,
+				Width:  contentSize.Width,
+				Height: contentSize.Height,
+				Scale:  opts.getScale(),
+			}).Do(ctx)
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 }
 

@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/bots-house/webshot/internal"
 	"golang.org/x/xerrors"
@@ -27,6 +28,15 @@ type Opts struct {
 	// Quality of image
 	Quality int
 
+	// Delay before take screenshot in seconds
+	Delay time.Duration
+
+	// Capture full page screenshot
+	FullPage bool
+
+	// Set this parameter to true to scroll through the entire page before capturing a screenshot.
+	ScrollPage bool
+
 	// Clip of viewport.
 	// All fields is required.
 	Clip OptsClip
@@ -40,6 +50,9 @@ func (opts Opts) Hash() string {
 	buf.WriteString(strconv.FormatFloat(opts.getScale(), 'f', -1, 64))
 	buf.WriteString(opts.Format.String())
 	buf.WriteString(strconv.FormatFloat(float64(opts.Quality), 'f', -1, 64))
+	buf.WriteString(strconv.FormatInt(int64(opts.Delay.Seconds()), 10))
+	buf.WriteString(strconv.FormatBool(opts.FullPage))
+	buf.WriteString(strconv.FormatBool(opts.ScrollPage))
 
 	if opts.Clip.IsSet() {
 		buf.WriteString(strconv.FormatFloat(*opts.Clip.X, 'f', -1, 64))
@@ -131,6 +144,10 @@ func (opts *Opts) getWidth() int {
 	}
 
 	return opts.Width
+}
+
+func (opts *Opts) hasWidth() bool {
+	return opts.Width != 0
 }
 
 func (opts *Opts) getHeight() int {
