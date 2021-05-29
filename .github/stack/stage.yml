@@ -31,6 +31,7 @@ services:
       replicas: 1
     
       update_config:
+        order: start-first
         parallelism: 1
         delay: 10s
 
@@ -53,7 +54,10 @@ services:
         - traefik.http.routers.webshot-https.tls=true
         - traefik.http.routers.webshot-https.tls.certresolver=le-cf
         - traefik.http.services.webshot.loadbalancer.server.port=8000
-  
+        - traefik.http.services.webshot.loadbalancer.healthcheck.path=/health
+        - traefik.http.services.webshot.loadbalancer.healthcheck.interval=1s
+        - traefik.http.services.webshot.loadbalancer.healthcheck.timeout=10s
+        
   chrome:
     image: browserless/chrome
     networks: [default]
@@ -64,6 +68,7 @@ services:
       replicas: 1
     
       update_config:
+        order: start-first
         parallelism: 1
         delay: 10s
 
