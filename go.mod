@@ -6,10 +6,9 @@ require (
 	github.com/aws/aws-sdk-go v1.38.50
 	github.com/chromedp/cdproto v0.0.0-20210526005521-9e51b9051fd0
 	github.com/chromedp/chromedp v0.7.3
-	github.com/go-chi/chi/v5 v5.0.3 // indirect
+	github.com/go-chi/chi/v5 v5.0.3
 	github.com/gorilla/schema v1.2.0
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/justinas/alice v1.2.0
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.22.0
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
