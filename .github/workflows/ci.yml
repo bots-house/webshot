@@ -29,6 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint-docker, lint-go]
     if: github.ref == 'refs/heads/main'
+    permissions:
+      packages: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,7 +59,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         id: build_and_push
@@ -88,6 +91,10 @@ jobs:
   deploy-stage:
     name: Deploy Staging
     runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://webshot.bots.house
+      
     needs: [build-image]
     if: github.ref == 'refs/heads/main'
     steps:
