@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/bots-house/webshot/internal"
 	"github.com/bots-house/webshot/internal/handler/api"
@@ -33,6 +34,7 @@ func (builder *Builder) Build() http.Handler {
 	)
 
 	router.Get("/version", api.NewVersionHandler(builder.BuildInfo))
+	router.Get("/health", api.NewHealthHandler(time.Now()))
 
 	return router
 }
