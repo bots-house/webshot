@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/bots-house/webshot/internal"
 	"github.com/bots-house/webshot/internal/handler"
 	"github.com/bots-house/webshot/internal/handler/api"
 	"github.com/bots-house/webshot/internal/renderer"
@@ -136,6 +137,11 @@ func run(ctx context.Context, config Config) error {
 	builder := handler.Builder{
 		Service: srv,
 		Auth:    apiAuth,
+		BuildInfo: internal.BuildInfo{
+			Version: buildVersion,
+			Time:    buildTime,
+			Ref:     buildRef,
+		},
 	}
 
 	return listenAndServe(ctx, config.HTTP.Addr, builder.Build())

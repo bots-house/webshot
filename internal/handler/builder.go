@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/bots-house/webshot/internal"
 	"github.com/bots-house/webshot/internal/handler/api"
 	"github.com/bots-house/webshot/internal/handler/middleware"
 	"github.com/bots-house/webshot/internal/handler/web"
@@ -13,8 +14,9 @@ import (
 )
 
 type Builder struct {
-	Service *service.Service
-	Auth    api.Auth
+	Service   *service.Service
+	Auth      api.Auth
+	BuildInfo internal.BuildInfo
 }
 
 func (builder *Builder) Build() http.Handler {
@@ -29,6 +31,8 @@ func (builder *Builder) Build() http.Handler {
 		"/image",
 		api.NewImageHandler(builder.Service, builder.Auth),
 	)
+
+	router.Get("/version", api.NewVersionHandler(builder.BuildInfo))
 
 	return router
 }
