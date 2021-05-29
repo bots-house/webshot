@@ -13,7 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/bots-house/webshot/internal/api"
+	"github.com/bots-house/webshot/internal/handler"
+	"github.com/bots-house/webshot/internal/handler/api"
 	"github.com/bots-house/webshot/internal/renderer"
 	"github.com/bots-house/webshot/internal/service"
 	"github.com/bots-house/webshot/internal/storage"
@@ -132,9 +133,12 @@ func run(ctx context.Context, config Config) error {
 		log.Ctx(ctx).Warn().Msg("sign key is not provided, auth is not required")
 	}
 
-	api := api.New(srv, apiAuth)
+	builder := handler.Builder{
+		Service: srv,
+		Auth:    apiAuth,
+	}
 
-	return listenAndServe(ctx, config.HTTP.Addr, api)
+	return listenAndServe(ctx, config.HTTP.Addr, builder.Build())
 }
 
 func listenAndServe(ctx context.Context, addr string, handler http.Handler) error {

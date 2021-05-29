@@ -36,7 +36,7 @@ type ScreenshotInput struct {
 	TTL   int  `schema:"ttl"`
 }
 
-func ScreenshotHandler(srv *service.Service, auth Auth) http.Handler {
+func NewImageHandler(srv *service.Service, auth Auth) http.HandlerFunc {
 	return handleError(func(w http.ResponseWriter, r *http.Request) error {
 		ctx := r.Context()
 
