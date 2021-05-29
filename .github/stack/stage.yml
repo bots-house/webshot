@@ -1,4 +1,4 @@
-version: "3"
+version: "3.9"
 
 networks:
   traefik_default:
@@ -6,7 +6,7 @@ networks:
 
 services:
   server:
-    image: ghcr.io/bots-house/webshot:latest
+    image: ghcr.io/bots-house/webshot:dev
 
     networks: [traefik_default, default]
 
