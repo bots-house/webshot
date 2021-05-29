@@ -91,7 +91,10 @@ jobs:
   deploy-stage:
     name: Deploy Staging
     runs-on: ubuntu-latest
-    environment: staging
+    environment:
+      name: staging
+      url: https://webshot.bots.house
+      
     needs: [build-image]
     if: github.ref == 'refs/heads/main'
     steps:
