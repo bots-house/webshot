@@ -5,7 +5,7 @@ Self-hosted web page screenshot generator.
 ## API
 
 ```http
-GET https://webshot.bots.house/screenshot
+GET https://webshot.bots.house/image
 ```
 
 | Param         |   Type    | Description                                             |   Default    |

@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/bots-house/webshot/internal/api/public"
+	"github.com/bots-house/webshot/internal/handler/api/public"
 )
 
 func IndexHandler() http.Handler {

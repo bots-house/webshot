@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let buildUrl = (formEl) => {
     const formData = new FormData(formEl);
 
-    const url = new URL(`${window.location.origin}/screenshot`);
+    const url = new URL(`${window.location.origin}/image`);
     for (let [k, v] of formData.entries()) {
       if (k == "key") {
         continue;
