@@ -27,7 +27,7 @@ func (builder *Builder) Build() http.Handler {
 
 	router.Get(
 		"/image",
-		api.NewScreenshotHandler(builder.Service, builder.Auth),
+		api.NewImageHandler(builder.Service, builder.Auth),
 	)
 
 	return router
