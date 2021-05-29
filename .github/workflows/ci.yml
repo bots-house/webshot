@@ -28,7 +28,7 @@ jobs:
     name: Build Image
     runs-on: ubuntu-latest
     needs: [lint-docker, lint-go]
-    if: github.ref == 'refs/heads/add-github-actions-env-support'
+    if: github.ref == 'refs/heads/main'
     permissions:
       packages: write
       contents: read
@@ -91,9 +91,9 @@ jobs:
   deploy-stage:
     name: Deploy Staging
     runs-on: ubuntu-latest
-    environment: stage
+    environment: staging
     needs: [build-image]
-    if: github.ref == 'refs/heads/add-github-actions-env-support'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
