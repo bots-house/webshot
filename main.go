@@ -53,6 +53,8 @@ type Config struct {
 		Pretty bool `long:"pretty" description:"enable pretty logging" env:"PRETTY"`
 		Debug  bool `long:"debug" description:"enable debug level" env:"DEBUG"`
 	} `group:"Logging" namespace:"log" env-namespace:"LOG"`
+
+	Healthcheck bool `long:"healthcheck" description:"do healthcheck and exit if failure"`
 }
 
 func loadConfig() Config {
@@ -93,6 +95,17 @@ func main() {
 	ctx, cancel = signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
+	if config.Healthcheck {
+		if err := runHealthcheck(ctx, config); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err)
+			defer os.Exit(2)
+		} else {
+			fmt.Fprint(os.Stderr, "💚\n")
+		}
+
+		return
+	}
+
 	log.Ctx(ctx).Info().
 		Dict("build", zerolog.Dict().
 			Str("version", buildVersion).
@@ -101,13 +114,39 @@ func main() {
 		).
 		Msg("start webshot")
 
-	if err := run(ctx, config); err != nil {
+	if err := runServer(ctx, config); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err)
 		defer os.Exit(2)
 	}
+
 }
 
-func run(ctx context.Context, config Config) error {
+func runHealthcheck(ctx context.Context, config Config) error {
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodGet,
+		fmt.Sprintf("http://%s/health", config.HTTP.Addr),
+		nil,
+	)
+
+	if err != nil {
+		return xerrors.Errorf("build healthcheck request: %w", err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return xerrors.Errorf("do healthcheck request: %w", err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return xerrors.Errorf("invalid status code %d, 200 is excepted", res.StatusCode)
+	}
+
+	return nil
+}
+
+func runServer(ctx context.Context, config Config) error {
 
 	storage, err := newStorage(ctx, config)
 	if err != nil {

@@ -33,13 +33,11 @@ FROM chromedp/headless-shell:90.0.4430.212
 COPY --from=builder /bin/webshot /bin/webshot
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "/bin/webshot", "-health" ]
-
-EXPOSE 8000
-
 
 # Reference: https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.source="https://github.com/bots-house/webshot"
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD [ "/bin/webshot", "--healthcheck" ]
 
 EXPOSE 8000/tcp
 
