@@ -191,7 +191,11 @@ func runServer(ctx context.Context, config Config) error {
 	}
 
 	if config.Sentry.DSN != "" {
-		log.Ctx(ctx).Info().Str("env", config.Sentry.Env).Msg("init sentry")
+		log.Ctx(ctx).Info().
+			Str("env", config.Sentry.Env).
+			Float64("traces_sample_rate", config.Sentry.TracesSampleRate).
+			Msg("init sentry")
+
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:              config.Sentry.DSN,
 			AttachStacktrace: true,
