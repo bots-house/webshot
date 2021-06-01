@@ -28,7 +28,7 @@ services:
       LOG_DEBUG: 'true'
       SENTRY_DSN: ${SENTRY_DSN}
       SENTRY_ENV: staging
-      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE}
+      SENTRY_TRACES_SAMPLE_RATE: '${SENTRY_TRACES_SAMPLE_RATE}'
 
     deploy:
       replicas: 1
