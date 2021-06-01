@@ -6,6 +6,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
+	"github.com/tomasen/realip"
 )
 
 var (
@@ -44,6 +45,9 @@ func RequestID(next http.Handler) http.Handler {
 
 		if hub := sentry.GetHubFromContext(ctx); hub != nil {
 			hub.Scope().SetTag("transaction_id", id)
+			hub.Scope().SetUser(sentry.User{
+				IPAddress: realip.RealIP(r),
+			})
 		}
 
 		rw.Header().Set(outputHeader, id)
