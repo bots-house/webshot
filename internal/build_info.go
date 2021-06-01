@@ -5,3 +5,7 @@ type BuildInfo struct {
 	Ref     string `json:"ref"`
 	Time    string `json:"time"`
 }
+
+func (info *BuildInfo) Release() string {
+	return info.Version + "-" + info.Ref
+}

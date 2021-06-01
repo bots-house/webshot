@@ -19,6 +19,7 @@ import (
 	"github.com/bots-house/webshot/internal/renderer"
 	"github.com/bots-house/webshot/internal/service"
 	"github.com/bots-house/webshot/internal/storage"
+	"github.com/getsentry/sentry-go"
 	"github.com/jessevdk/go-flags"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -54,6 +55,12 @@ type Config struct {
 		Debug  bool `long:"debug" description:"enable debug level" env:"DEBUG"`
 	} `group:"Logging" namespace:"log" env-namespace:"LOG"`
 
+	Sentry struct {
+		DSN              string  `long:"dsn" description:"sentry project DSN, when provided, enables error reporting to Sentry" env:"DSN"`
+		Env              string  `long:"env" description:"sentry environment to report" env:"ENV" default:"production"`
+		TracesSampleRate float64 `long:"traces-sample-rate" description:"sentry traces rate, keep it lower on production" default:"0.0" env:"TRACES_SAMPLE_RATE"`
+	} `group:"Sentry" namespace:"sentry" env-namespace:"SENTRY"`
+
 	Healthcheck bool `long:"healthcheck" description:"do healthcheck and exit if failure"`
 }
 
@@ -82,6 +89,10 @@ var (
 	buildVersion = "unknown"
 	buildRef     = "unknown"
 	buildTime    = "unknown"
+)
+
+const (
+	sentryFlushTimeout = time.Second * 5
 )
 
 func main() {
@@ -173,14 +184,32 @@ func runServer(ctx context.Context, config Config) error {
 		log.Ctx(ctx).Warn().Msg("sign key is not provided, auth is not required")
 	}
 
+	buildInfo := internal.BuildInfo{
+		Version: buildVersion,
+		Time:    buildTime,
+		Ref:     buildRef,
+	}
+
+	if config.Sentry.DSN != "" {
+		log.Ctx(ctx).Info().Str("env", config.Sentry.Env).Msg("init sentry")
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn:              config.Sentry.DSN,
+			AttachStacktrace: true,
+			Environment:      config.Sentry.Env,
+			Release:          buildInfo.Release(),
+			TracesSampleRate: config.Sentry.TracesSampleRate,
+		}); err != nil {
+			return xerrors.Errorf("init sentry: %w", err)
+		}
+
+		defer sentry.Flush(sentryFlushTimeout)
+	}
+
 	builder := handler.Builder{
-		Service: srv,
-		Auth:    apiAuth,
-		BuildInfo: internal.BuildInfo{
-			Version: buildVersion,
-			Time:    buildTime,
-			Ref:     buildRef,
-		},
+		Service:   srv,
+		Auth:      apiAuth,
+		BuildInfo: buildInfo,
+		Sentry:    config.Sentry.DSN != "",
 	}
 
 	return listenAndServe(ctx, config.HTTP.Addr, builder.Build())

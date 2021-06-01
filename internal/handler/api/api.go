@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,6 +23,9 @@ func handleError(h func(w http.ResponseWriter, r *http.Request) error) http.Hand
 					return
 				}
 			default:
+				if hub := sentry.GetHubFromContext(ctx); hub != nil {
+					hub.CaptureException(err)
+				}
 				herr := httpError(err, http.StatusInternalServerError)
 				w.WriteHeader(herr.Code)
 				if err := json.NewEncoder(w).Encode(herr); err != nil {
