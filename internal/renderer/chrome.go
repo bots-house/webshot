@@ -111,7 +111,9 @@ func (chrome *Chrome) Render(
 
 	// set size and scale
 	actions = append(actions, logAction(ctx,
-		"emulate viewport", logFields{
+		"emulate viewport",
+
+		logFields{
 			"width":  opts.getWidth(),
 			"height": opts.getHeight(),
 			"scale":  opts.getScale(),

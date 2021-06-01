@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
 )
@@ -40,6 +41,10 @@ func RequestID(next http.Handler) http.Handler {
 			Logger()
 
 		ctx = logger.WithContext(ctx)
+
+		if hub := sentry.GetHubFromContext(ctx); hub != nil {
+			hub.Scope().SetTag("transaction_id", id)
+		}
 
 		rw.Header().Set(outputHeader, id)
 

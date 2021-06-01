@@ -26,6 +26,9 @@ services:
       STORAGE_S3_SUBDIR: ${STORAGE_S3_SUBDIR}
       BROWSER_ADDR: http://chrome:3000
       LOG_DEBUG: 'true'
+      SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_ENV: staging
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE}
 
     deploy:
       replicas: 1

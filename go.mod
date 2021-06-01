@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.38.51
 	github.com/chromedp/cdproto v0.0.0-20210526005521-9e51b9051fd0
 	github.com/chromedp/chromedp v0.7.3
+	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/gorilla/schema v1.2.0
 	github.com/jessevdk/go-flags v1.5.0

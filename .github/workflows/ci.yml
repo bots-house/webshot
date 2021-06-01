@@ -123,5 +123,7 @@ jobs:
             STORAGE_S3_BUCKET: ${{ secrets.STORAGE_S3_BUCKET }}
             STORAGE_S3_ENDPOINT: ${{ secrets.STORAGE_S3_ENDPOINT }}
             STORAGE_S3_SUBDIR: ${{ secrets.STORAGE_S3_SUBDIR }}
+            SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+            SENTRY_TRACES_SAMPLE_RATE: 0.5
 
           teams: Microservices
