@@ -103,7 +103,7 @@ jobs:
       url: https://webshot.bots.house
       
     needs: [build-image]
-    if: github.ref == 'refs/heads/digitalocean-deployment-button'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
