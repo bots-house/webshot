@@ -17,8 +17,8 @@ import (
 )
 
 type Chrome struct {
-	Debug bool
-
+	Debug    bool
+	Args     map[string]string
 	Resolver ChromeResolver
 }
 
@@ -32,14 +32,20 @@ func (chrome *Chrome) buildContextOptions() []chromedp.ContextOption {
 	return opts
 }
 
-// func (chrome *Chrome) buildAllocator(ctx context.Context) (context.Context, context.CancelFunc) {
-// 	return chromedp.NewExecAllocator(ctx,
-// 		append(
-// 			chromedp.DefaultExecAllocatorOptions[:],
-// 			chromedp.Flag("headless", false),
-// 		)...,
-// 	)
-// }
+func (chrome *Chrome) newLocalAllocator(ctx context.Context) (context.Context, context.CancelFunc) {
+	args := make([]chromedp.ExecAllocatorOption, 0, len(chrome.Args))
+
+	for k, v := range chrome.Args {
+		args = append(args, chromedp.Flag(k, v))
+	}
+
+	return chromedp.NewExecAllocator(ctx,
+		append(
+			chromedp.DefaultExecAllocatorOptions[:],
+			args...,
+		)...,
+	)
+}
 
 func (chrome *Chrome) Render(
 	ctx context.Context,
@@ -77,6 +83,8 @@ func (chrome *Chrome) Render(
 
 	}(time.Now())
 
+	var cancel context.CancelFunc
+
 	if chrome.Resolver != nil {
 		wsurl, err := chrome.Resolver.BrowserWebSocketURL(ctx)
 		if err != nil {
@@ -85,15 +93,17 @@ func (chrome *Chrome) Render(
 
 		log.Ctx(ctx).Debug().Str("url", wsurl).Msg("use remote browser")
 
-		var cancel context.CancelFunc
 		ctx, cancel = chromedp.NewRemoteAllocator(ctx, wsurl)
 		defer cancel()
 	} else {
-		log.Ctx(ctx).Debug().Msg("use embedded browser")
+		ctx, cancel = chrome.newLocalAllocator(ctx)
+		defer cancel()
+
+		log.Ctx(ctx).Debug().Interface("args", chrome.Args).Msg("use embedded browser")
 	}
 
 	// create context
-	ctx, cancel := chromedp.NewContext(
+	ctx, cancel = chromedp.NewContext(
 		ctx,
 		chrome.buildContextOptions()...,
 	)

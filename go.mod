@@ -1,3 +1,4 @@
+// +heroku goVersion go1.16
 module github.com/bots-house/webshot
 
 go 1.16

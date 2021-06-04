@@ -23,3 +23,9 @@ GET https://webshot.bots.house/image
 | `delay`       |   `int`   | Delay in milliseconds, to wait after the page is loaded       |     null     |
 | `full_page`   |  `bool`   | Capture full page screenshot                                  |    false     |
 | `scroll_page` |  `bool`   | Scroll through the entire page before capturing a screenshot. |    false     |
+
+## Deploy
+
+### Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/bots-house/webshot/tree/heroku-button)

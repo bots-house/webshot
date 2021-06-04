@@ -1,0 +1,84 @@
+{
+  "name": "WebShot",
+  "description": "Self-hosted web page screenshot service",
+  "repository": "https://github.com/bots-house/webshot",
+  "logo": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/camera-with-flash_1f4f8.png",
+  "keywords": [
+    "golang",
+    "chrome",
+    "chrome-headless",
+    "screenshot",
+    "api"
+  ],
+  "website": "https://webshot.bots.house",
+  "success_url": "/",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-go"
+    }
+  ],
+  "env": {
+    "AUTH_SIGN_KEY": {
+      "description": "HMAC request signature secret key, provide it if you need auth",
+      "required": false
+    },
+
+    "BROWSER_ADDR": {
+      "description": "Remote browser connection string, provide it if you want use remote browser for rendering. Allowed is ws://... or http://",
+      "required": false
+    },
+
+    "STORAGE_S3_KEY": {
+      "description": "S3 Access Key, provide it and other STORAGE_S3_* keys if you need caching",
+      "required": false
+    },
+    "STORAGE_S3_SECRET": {
+      "description": "S3 Secret Key",
+      "required": false
+    },
+    "STORAGE_S3_REGION": {
+      "description": "S3 Region",
+      "required": false
+    },
+    "STORAGE_S3_BUCKET": {
+      "description": "S3 Bucket",
+      "required": false
+    },
+    "STORAGE_S3_ENDPOINT": {
+      "description": "S3 Endpoint",
+      "required": false
+    },
+    "STORAGE_S3_SUBDIR": {
+      "description": "S3 Subdir e.g. /webshot",
+      "required": false
+    },
+
+    "LOG_DEBUG": {
+      "description": "Enable debug logs",
+      "value": "true",
+      "required": false
+    },
+    "LOG_PRETTY": {
+      "description": "Enable pretty logs",
+      "value": "true",
+      "required": false
+    },
+    "SENTRY_DSN": {
+      "description": "Sentry DSN for errors tracking",
+      "required": false
+    },
+    "SENTRY_ENV": {
+      "description": "Sentry environment",
+      "value": "production",
+      "required": false
+    },
+    "SENTRY_TRACES_SAMPLE_RATE": {
+      "description": "Sentry traces rate, keep it lower on production",
+      "value": "0.1",
+      "required": false
+    }
+  }
+}
