@@ -1,0 +1,3 @@
+build:
+  config:
+    GO_LINKER_SYMBOL: main.buildRef
