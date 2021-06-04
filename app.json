@@ -10,6 +10,7 @@
     "screenshot"
   ],
   "website": "https://webshot.bots.house",
+  "success_url": "/",
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
@@ -19,11 +20,6 @@
     }
   ],
   "env": {
-    "BROWSER_ARGS": {
-      "description": "Additional browser args need for run Chrome in Heroku",
-      "value": "no-sandbox:true",
-      "required": true
-    },
     "LOG_DEBUG": {
       "description": "Enable debug logs",
       "value": "true",
