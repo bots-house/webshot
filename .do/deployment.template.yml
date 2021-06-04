@@ -1,0 +1,7 @@
+spec:
+ name: WebShot
+ services:
+ - name: web
+   git:
+     branch: digitalocean-deployment-button
+     repo_clone_url: https://github.com/bots-house/webshot.git
