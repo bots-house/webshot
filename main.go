@@ -36,7 +36,8 @@ type Config struct {
 	} `group:"HTTP" namespace:"http" env-namespace:"HTTP"`
 
 	Browser struct {
-		Addr string `long:"addr" description:"remote browser connection string. Allowed is ws://... or http://" env:"ADDR"`
+		Addr string            `long:"addr" description:"remote browser connection string. Allowed is ws://... or http://" env:"ADDR"`
+		Args map[string]string `long:"args" description:"extra local chrome command line args" env:"ARGS" env-delim:" "`
 	} `group:"Browser" namespace:"browser" env-namespace:"BROWSER"`
 
 	Storage struct {
@@ -62,6 +63,14 @@ type Config struct {
 	} `group:"Sentry" namespace:"sentry" env-namespace:"SENTRY"`
 
 	Healthcheck bool `long:"healthcheck" description:"do healthcheck and exit if failure"`
+
+	Port int `long:"port" description:"port to listen, used by Heroku" env:"PORT" hidden:"true"`
+}
+
+func (cfg *Config) compute() {
+	if cfg.Port != 0 {
+		cfg.HTTP.Addr = fmt.Sprintf("0.0.0.0:%d", cfg.Port)
+	}
 }
 
 func loadConfig() Config {
@@ -82,6 +91,8 @@ func loadConfig() Config {
 		}
 	}
 
+	config.compute()
+
 	return config
 }
 
@@ -97,7 +108,6 @@ const (
 
 func main() {
 	config := loadConfig()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -158,7 +168,6 @@ func runHealthcheck(ctx context.Context, config Config) error {
 }
 
 func runServer(ctx context.Context, config Config) error {
-
 	storage, err := newStorage(ctx, config)
 	if err != nil {
 		return xerrors.Errorf("new storage: %w", err)
@@ -284,7 +293,7 @@ func newRenderer(ctx context.Context, cfg Config) (renderer.Renderer, error) {
 		log.Ctx(ctx).Info().Msg("init local chrome renderer")
 	}
 
-	return &renderer.Chrome{Resolver: resolver}, nil
+	return &renderer.Chrome{Resolver: resolver, Args: cfg.Browser.Args}, nil
 }
 
 func newStorage(_ context.Context, cfg Config) (storage.Storage, error) {

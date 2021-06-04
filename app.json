@@ -1,0 +1,38 @@
+{
+  "name": "WebShot",
+  "description": "Self-hosted web page screenshot service",
+  "repository": "https://github.com/bots-house/webshot",
+  "logo": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/camera-with-flash_1f4f8.png",
+  "keywords": [
+    "go",
+    "chrome",
+    "chrome-headless",
+    "screenshot"
+  ],
+  "website": "https://webshot.bots.house",
+  "env": {
+    "BROWSER_ARGS": {
+      "description": "Additional browser args need for run Chrome in Heroku",
+      "value": "no-sandbox:true"
+    },
+    "LOG_DEBUG": {
+      "description": "Enable debug logs",
+      "value": "true"
+    },
+    "LOG_PRETTY": {
+      "description": "Enable pretty logs",
+      "value": "true"
+    },
+    "SENTRY_DSN": {
+      "description": "Sentry DSN for errors tracking"
+    },
+    "SENTRY_ENV": {
+      "description": "Sentry env",
+      "value": "production"
+    },
+    "SENTRY_TRACES_SAMPLE_RATE": {
+      "description": "traces rate, keep it lower on production",
+      "value": "0.1"
+    }
+  }
+}
