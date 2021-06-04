@@ -28,4 +28,11 @@ GET https://webshot.bots.house/image
 
 ### Heroku
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/bots-house/webshot/tree/main)
+[![Deploy Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/bots-house/webshot/tree/main)
+
+
+### DigitalOcean
+
+[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/bots-house/webshot/tree/digitalocean-deployment-button)
+
+[comment]: <> (TODO: REPLACE BRANCH HERE)
