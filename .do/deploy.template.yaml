@@ -1,5 +1,5 @@
 spec:
- name: WebShot
+ name: webshot
  services:
  - name: web
    git:
