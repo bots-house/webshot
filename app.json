@@ -10,10 +10,18 @@
     "screenshot"
   ],
   "website": "https://webshot.bots.house",
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-go"
+    }
+  ],
   "env": {
     "BROWSER_ARGS": {
       "description": "Additional browser args need for run Chrome in Heroku",
-      "value": "no-sandbox:true", 
+      "value": "no-sandbox:true",
       "required": true
     },
     "LOG_DEBUG": {
@@ -32,7 +40,7 @@
     },
     "SENTRY_ENV": {
       "description": "Sentry env",
-      "value": "production", 
+      "value": "production",
       "required": false
     },
     "SENTRY_TRACES_SAMPLE_RATE": {
