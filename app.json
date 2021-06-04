@@ -71,12 +71,12 @@
       "required": false
     },
     "SENTRY_ENV": {
-      "description": "Sentry env",
+      "description": "Sentry environment",
       "value": "production",
       "required": false
     },
     "SENTRY_TRACES_SAMPLE_RATE": {
-      "description": "traces rate, keep it lower on production",
+      "description": "Sentry traces rate, keep it lower on production",
       "value": "0.1",
       "required": false
     }
