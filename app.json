@@ -23,7 +23,8 @@
   "env": {
     "AUTH_SIGN_KEY": {
       "description": "HMAC request signature secret key, provide it if you need auth",
-      "required": false
+      "required": false,
+      "generator": "secret"
     }, 
 
     "BROWSER_ADDR": {
