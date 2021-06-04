@@ -13,26 +13,32 @@
   "env": {
     "BROWSER_ARGS": {
       "description": "Additional browser args need for run Chrome in Heroku",
-      "value": "no-sandbox:true"
+      "value": "no-sandbox:true", 
+      "required": true
     },
     "LOG_DEBUG": {
       "description": "Enable debug logs",
-      "value": "true"
+      "value": "true",
+      "required": false
     },
     "LOG_PRETTY": {
       "description": "Enable pretty logs",
-      "value": "true"
+      "value": "true",
+      "required": false
     },
     "SENTRY_DSN": {
-      "description": "Sentry DSN for errors tracking"
+      "description": "Sentry DSN for errors tracking",
+      "required": false
     },
     "SENTRY_ENV": {
       "description": "Sentry env",
-      "value": "production"
+      "value": "production", 
+      "required": false
     },
     "SENTRY_TRACES_SAMPLE_RATE": {
       "description": "traces rate, keep it lower on production",
-      "value": "0.1"
+      "value": "0.1",
+      "required": false
     }
   }
 }
