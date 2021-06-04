@@ -24,7 +24,7 @@
     "AUTH_SIGN_KEY": {
       "description": "HMAC request signature secret key, provide it if you need auth",
       "required": false
-    }, 
+    },
 
     "BROWSER_ADDR": {
       "description": "Remote browser connection string, provide it if you want use remote browser for rendering. Allowed is ws://... or http://",
