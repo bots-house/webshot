@@ -3,7 +3,7 @@ spec:
   services:
     - name: api
       git:
-        branch: digitalocean-deployment-button
+        branch: main
         repo_clone_url: https://github.com/bots-house/webshot
 
       http_port: 8000
