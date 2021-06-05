@@ -45,6 +45,10 @@ spec:
           scope: RUN_TIME
           value: "true"
 
+    # NOTE: Currently DigitalOcean does not allow 
+    # to deploy multiservice apps
+    # by "Deploy button"
+
     # - name: chrome
     #   image:
     #     registry_type: DOCKER_HUB
