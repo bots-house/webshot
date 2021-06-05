@@ -36,7 +36,7 @@ spec:
           scope: RUN_TIME
           value: digitalocean
         - key: SENTRY_TRACES_SAMPLE_RATE
-          value: 0
+          value: '0'
         
         - key: LOG_DEBUG
           scope: RUN_TIME
