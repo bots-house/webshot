@@ -33,6 +33,8 @@ GET https://webshot.bots.house/image
 
 ### DigitalOcean
 
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/bots-house/webshot/tree/digitalocean-deployment-button)
+[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/bots-house/webshot/tree/main)
 
-[comment]: <> (TODO: REPLACE BRANCH HERE)
+### Google Cloud Run
+
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
