@@ -11,7 +11,6 @@
     "api"
   ],
   "website": "https://webshot.bots.house",
-  "success_url": "/",
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
