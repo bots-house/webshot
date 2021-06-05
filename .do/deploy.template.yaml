@@ -5,12 +5,6 @@ spec:
    git:
     branch: main
     repo_clone_url: https://github.com/bots-house/webshot
-
-   image:
-    registry_type: DOCKER_HUB
-    registry: botshouse
-    repository: webshot
-    tag: dev
    http_port: 8000
    health_check:
     http_path: /health
