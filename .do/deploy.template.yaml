@@ -12,7 +12,7 @@ spec:
       envs:
         - key: AUTH_SIGN_KEY
           scope: RUN_TIME 
-          
+
         - key: BROWSER_ADDR
           scope: RUN_TIME
 
@@ -35,7 +35,7 @@ spec:
           scope: RUN_TIME
           value: digitalocean
         - key: SENTRY_TRACES_SAMPLE_RATE
-          value: digitalocean
+          value: 0
         
         - key: LOG_DEBUG
           scope: RUN_TIME
