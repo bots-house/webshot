@@ -1,0 +1,71 @@
+spec:
+  name: webshot
+  services:
+    - name: api
+      git:
+        branch: main
+        repo_clone_url: https://github.com/bots-house/webshot
+
+      http_port: 8000
+      dockerfile_path: Dockerfile
+      health_check:
+        http_path: /health
+      envs:
+        - key: AUTH_SIGN_KEY
+          scope: RUN_TIME
+
+        - key: BROWSER_ADDR
+          scope: RUN_TIME
+
+        - key: STORAGE_S3_KEY
+          scope: RUN_TIME
+        - key: STORAGE_S3_SECRET
+          scope: RUN_TIME
+        - key: STORAGE_S3_REGION
+          scope: RUN_TIME
+        - key: STORAGE_S3_BUCKET
+          scope: RUN_TIME
+        - key: STORAGE_S3_ENDPOINT
+          scope: RUN_TIME
+        - key: STORAGE_S3_SUBDIR
+          scope: RUN_TIME
+
+        - key: SENTRY_DSN
+          scope: RUN_TIME
+        - key: SENTRY_ENV
+          scope: RUN_TIME
+          value: digitalocean
+        - key: SENTRY_TRACES_SAMPLE_RATE
+          value: "0"
+
+        - key: LOG_DEBUG
+          scope: RUN_TIME
+          value: "true"
+        - key: LOG_PRETTY
+          scope: RUN_TIME
+          value: "true"
+
+    # NOTE: Currently DigitalOcean does not allow 
+    # to deploy multiservice apps
+    # by "Deploy button"
+
+    # - name: chrome
+    #   image:
+    #     registry_type: DOCKER_HUB
+    #     registry: browserless
+    #     repository: chrome
+    #     tag: latest
+    #   health_check:
+    #     http_path: /json
+    #   internal_ports:
+    #     - 3000
+    #   envs:
+    #     - key: MAX_CONCURRENT_SESSIONS
+    #       scope: RUN_TIME
+    #       value: "10"
+    #     - key: ENABLE_DEBUGGER
+    #       scope: RUN_TIME
+    #       value: "false"
+    #     - key: DEBUG
+    #       scope: RUN_TIME
+    #       value: "-*"
