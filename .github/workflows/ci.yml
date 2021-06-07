@@ -26,23 +26,6 @@ jobs:
             - '*.go'
             - 'go.*'
 
-  lint-all:
-    name: Lint Everything
-    runs-on: ubuntu-latest
-    needs: [changes]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Lint Code Base
-        uses: docker://ghcr.io/github/super-linter:slim-v4
-        env:
-          # VALIDATE_ALL_CODEBASE: 
-          # DEFAULT_BRANCH: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   lint-docker:
     name: Lint Docker
     runs-on: ubuntu-latest
