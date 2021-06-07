@@ -107,6 +107,7 @@ const (
 )
 
 func main() {
+
 	config := loadConfig()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
