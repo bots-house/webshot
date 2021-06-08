@@ -56,7 +56,7 @@ jobs:
     needs: [lint-docker, lint-go]
     if: |
       always() && 
-      (github.ref == 'refs/heads/run-ci-for-modified-only') && 
+      (github.ref == 'refs/heads/main') && 
       (needs.lint-docker.result == 'success' || needs.lint-docker.result == 'skipped') &&
       (needs.lint-go.result == 'success' || needs.lint-go.result == 'skipped')
     permissions:
