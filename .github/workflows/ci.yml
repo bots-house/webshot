@@ -4,9 +4,33 @@ on:
   push:
 
 jobs:
+
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-20.04
+    outputs:
+      docker: ${{ steps.filter.outputs.docker }}
+      go: ${{ steps.filter.outputs.go }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ github.ref }}
+        filters: |
+          docker:
+            - Dockerfile
+          go: 
+            - '*.go'
+            - 'go.*'
+
   lint-docker:
     name: Lint Docker
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ needs.changes.outputs.docker == 'true' }}
     steps:
       - uses: actions/checkout@v2
       - name: Lint Dockerfile
@@ -17,6 +41,8 @@ jobs:
   lint-go:
     name: Lint Go
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ needs.changes.outputs.go == 'true' }}
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
@@ -28,7 +54,11 @@ jobs:
     name: Build Image
     runs-on: ubuntu-latest
     needs: [lint-docker, lint-go]
-    if: github.ref == 'refs/heads/main'
+    if: |
+      always() && 
+      (github.ref == 'refs/heads/main') && 
+      (needs.lint-docker.result == 'success' || needs.lint-docker.result == 'skipped') &&
+      (needs.lint-go.result == 'success' || needs.lint-go.result == 'skipped')
     permissions:
       packages: write
       contents: read
