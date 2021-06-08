@@ -33,7 +33,6 @@ FROM chromedp/headless-shell:90.0.4430.212
 COPY --from=builder /bin/webshot /bin/webshot
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-
 # Reference: https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.source="https://github.com/bots-house/webshot"
 
