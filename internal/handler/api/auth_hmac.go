@@ -40,17 +40,17 @@ func (auth *AuthHMAC) Allow(ctx context.Context, r *http.Request) error {
 
 // ValidMAC reports whether messageMAC is a valid HMAC tag for message.
 func (auth *AuthHMAC) validHMAC(params url.Values, signature string) error {
-	keys := make([]string, len(params))
+	keys := make([]string, 0, len(params))
 	for k := range params {
 		keys = append(keys, k)
 	}
 
 	sort.Strings(keys)
 
-	msgParts := make([]string, 0, len(keys))
+	msgParts := make([]string, len(keys))
 
-	for k := range params {
-		msgParts = append(msgParts, k+"="+params.Get(k))
+	for i, k := range keys {
+		msgParts[i] = k + "=" + params.Get(k)
 	}
 
 	msg := strings.Join(msgParts, "|")
