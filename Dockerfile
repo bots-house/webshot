@@ -1,5 +1,5 @@
 # build static binary
-FROM golang:1.16.5-alpine3.12 as builder 
+FROM golang:1.17beta1-alpine3.12 as builder 
 
 
 WORKDIR /go/src/github.com/bots-house/webshot
