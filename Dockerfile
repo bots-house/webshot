@@ -28,7 +28,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 
 
 # run 
-FROM chromedp/headless-shell:91.0.4472.114
+FROM chromedp/headless-shell:91.0.4472.164
 
 COPY --from=builder /bin/webshot /bin/webshot
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
