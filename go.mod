@@ -4,7 +4,7 @@ module github.com/bots-house/webshot
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.38.67
+	github.com/aws/aws-sdk-go v1.40.33
 	github.com/chromedp/cdproto v0.0.0-20210526005521-9e51b9051fd0
 	github.com/chromedp/chromedp v0.7.3
 	github.com/getsentry/sentry-go v0.11.0
