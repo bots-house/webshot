@@ -8,7 +8,7 @@ jobs:
     name: Lint Docker
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - name: Lint Dockerfile
         uses: brpaz/hadolint-action@master
         with:
@@ -18,7 +18,7 @@ jobs:
     name: Lint Go
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2.5.2
         with:
@@ -34,7 +34,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
 
       - name: Calculate build args
         id: build_info
@@ -106,7 +106,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
 
       - name: Deploy Stack
         uses: bots-house/portainer-deploy-stack-action@main
