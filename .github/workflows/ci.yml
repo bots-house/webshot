@@ -69,7 +69,7 @@ jobs:
 
       - name: Build and push
         id: build_and_push
-        uses: docker/build-push-action@v2.5.0
+        uses: docker/build-push-action@v3.3.0
         with:
           build-args: |
             BUILD_VERSION=${{ steps.build_info.outputs.version }}
